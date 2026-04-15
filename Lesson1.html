@@ -2,92 +2,199 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Study English</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+  <title>Daily Routine Vocabulary</title>
   <style>
-    body {
-      font-family: 'Poppins', sans-serif;
-      background: linear-gradient(135deg, #74ebd5, #acb6e5);
-      margin: 0;
-      padding: 20px;
-    }
-
-    h1 {
-      text-align: center;
-      color: white;
-      margin-bottom: 30px;
-    }
-
-    .container {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 20px;
-      max-width: 1000px;
-      margin: auto;
-    }
-
-    .card {
-      background: white;
-      border-radius: 20px;
-      padding: 20px;
-      text-align: center;
-      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-      transition: transform 0.2s, box-shadow 0.2s;
-      cursor: pointer;
-    }
-
-    .card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 15px 25px rgba(0,0,0,0.2);
-    }
-
-    .icon {
-      font-size: 40px;
-      margin-bottom: 10px;
-    }
-
-    .title {
-      font-size: 18px;
-      font-weight: 600;
-      margin-bottom: 10px;
-    }
-
-    .desc {
-      font-size: 14px;
-      color: #666;
-    }
+    body { font-family: Arial; padding: 20px; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #ccc; padding: 10px; text-align: left; }
+    th { background-color: #f4f4f4; }
+    button { padding: 6px 12px; margin-right: 5px; }
+    .controls { margin-bottom: 15px; }
+    .ipa { color: #555; font-style: italic; }
+    .highlight { background-color: #ffeaa7; }
+    select { padding: 5px; margin-left: 10px; }
   </style>
 </head>
 <body>
 
-<h1>📚 Study English</h1>
+<h2>Daily Routine Vocabulary</h2>
 
-<div class="container">
+<div class="controls">
+  <button onclick="playAll()">▶ Play All</button>
+  <button onclick="pauseAll()">⏸ Pause</button>
+  <button onclick="resumeAll()">▶ Resume</button>
+  <button onclick="stopAll()">⏹ Stop</button>
 
-  <div class="card" onclick="goTo('lesson1.html')">
-    <div class="icon">⏰</div>
-    <div class="title">Lesson 1</div>
-    <div class="desc">Daily Routine</div>
-  </div>
+  Repeat:
+  <select id="repeatCount">
+    <option value="1">1</option>
+    <option value="2" selected>2</option>
+    <option value="3">3</option>
+  </select>
 
-  <div class="card" onclick="goTo('lesson2.html')">
-    <div class="icon">💬</div>
-    <div class="title">Lesson 2</div>
-    <div class="desc">Basic Conversation</div>
-  </div>
+  Speed:
+  <select id="speedRate">
+    <option value="0.7">Slow</option>
+    <option value="0.9" selected>Normal</option>
+    <option value="1.1">Fast</option>
+  </select>
 
-  <div class="card" onclick="goTo('lesson3.html')">
-    <div class="icon">🛒</div>
-    <div class="title">Lesson 3</div>
-    <div class="desc">Shopping</div>
-  </div>
-
+  <button onclick="startRecording()">🎤 Record</button>
+  <button onclick="stopRecording()">⏹ Stop Rec</button>
 </div>
 
+<table>
+  <thead>
+    <tr>
+      <th>No</th>
+      <th>Word</th>
+      <th>IPA</th>
+      <th>Meaning</th>
+      <th>Example</th>
+      <th>🔊</th>
+    </tr>
+  </thead>
+  <tbody id="vocabTable"></tbody>
+</table>
+
 <script>
-function goTo(page) {
-  window.location.href = page;
+const vocabList = [
+  {word: "wake up", ipa: "/weɪk ʌp/", meaning: "thức dậy", example: "I wake up at 6 a.m."},
+  {word: "get up", ipa: "/ɡet ʌp/", meaning: "ra khỏi giường", example: "I get up quickly."},
+  {word: "brush my teeth", ipa: "/brʌʃ maɪ tiːθ/", meaning: "đánh răng", example: "I brush my teeth every morning."},
+  {word: "have breakfast", ipa: "/hæv ˈbrekfəst/", meaning: "ăn sáng", example: "I have breakfast at 7 a.m."},
+  {word: "go to work", ipa: "/ɡoʊ tuː wɜːrk/", meaning: "đi làm", example: "I go to work at 8 a.m."},
+  {word: "have lunch", ipa: "/hæv lʌntʃ/", meaning: "ăn trưa", example: "I have lunch at noon."},
+  {word: "finish work", ipa: "/ˈfɪnɪʃ wɜːrk/", meaning: "tan làm", example: "I finish work at 5 p.m."},
+  {word: "go home", ipa: "/ɡoʊ hoʊm/", meaning: "về nhà", example: "I go home after work."},
+  {word: "have dinner", ipa: "/hæv ˈdɪnər/", meaning: "ăn tối", example: "I have dinner at 7 p.m."},
+  {word: "watch TV", ipa: "/wɑːtʃ ˌtiːˈviː/", meaning: "xem TV", example: "I watch TV in the evening."},
+  {word: "go to bed", ipa: "/ɡoʊ tuː bed/", meaning: "đi ngủ", example: "I go to bed at 10 p.m."}
+];
+
+const table = document.getElementById("vocabTable");
+
+vocabList.forEach((item, index) => {
+  const row = document.createElement("tr");
+  row.setAttribute("id", "row-" + index);
+
+  row.innerHTML = `
+    <td>${index + 1}</td>
+    <td>${item.word}</td>
+    <td class="ipa">${item.ipa}</td>
+    <td>${item.meaning}</td>
+    <td>${item.example}</td>
+    <td><button onclick="speakOnce('${item.example}')">Play</button></td>
+  `;
+
+  table.appendChild(row);
+});
+
+function getRate() {
+  return parseFloat(document.getElementById("speedRate").value);
+}
+
+function getRepeat() {
+  return parseInt(document.getElementById("repeatCount").value);
+}
+
+function speakOnce(text) {
+  const speech = new SpeechSynthesisUtterance(text);
+  speech.lang = 'en-US';
+  speech.rate = getRate();
+  window.speechSynthesis.speak(speech);
+}
+
+let isPlaying = false;
+let currentIndex = 0;
+
+async function playAll() {
+  stopAll();
+  isPlaying = true;
+  currentIndex = 0;
+
+  while (currentIndex < vocabList.length && isPlaying) {
+    highlightRow(currentIndex);
+
+    for (let i = 0; i < getRepeat(); i++) {
+      await speakWithPromise(vocabList[currentIndex].example);
+      await delay(500);
+    }
+
+    await delay(2000);
+    currentIndex++;
+  }
+
+  clearHighlight();
+}
+
+function highlightRow(index) {
+  clearHighlight();
+  const row = document.getElementById("row-" + index);
+  if (row) row.classList.add("highlight");
+}
+
+function clearHighlight() {
+  document.querySelectorAll("tr").forEach(r => r.classList.remove("highlight"));
+}
+
+function pauseAll() {
+  window.speechSynthesis.pause();
+}
+
+function resumeAll() {
+  window.speechSynthesis.resume();
+}
+
+function stopAll() {
+  isPlaying = false;
+  window.speechSynthesis.cancel();
+  clearHighlight();
+}
+
+function speakWithPromise(text) {
+  return new Promise(resolve => {
+    const speech = new SpeechSynthesisUtterance(text);
+    speech.lang = 'en-US';
+    speech.rate = getRate();
+
+    speech.onend = () => resolve();
+
+    window.speechSynthesis.speak(speech);
+  });
+}
+
+function delay(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+// Recording feature
+let mediaRecorder;
+let audioChunks = [];
+
+async function startRecording() {
+  const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+  mediaRecorder = new MediaRecorder(stream);
+  audioChunks = [];
+
+  mediaRecorder.ondataavailable = event => {
+    audioChunks.push(event.data);
+  };
+
+  mediaRecorder.onstop = () => {
+    const audioBlob = new Blob(audioChunks);
+    const audioUrl = URL.createObjectURL(audioBlob);
+    const audio = document.createElement("audio");
+    audio.src = audioUrl;
+    audio.controls = true;
+    document.body.appendChild(audio);
+  };
+
+  mediaRecorder.start();
+}
+
+function stopRecording() {
+  if (mediaRecorder) mediaRecorder.stop();
 }
 </script>
 
