@@ -180,26 +180,50 @@ function delay(ms) {
 // Recording feature
 let mediaRecorder;
 let audioChunks = [];
+let stream;
 
 async function startRecording() {
-  const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-  mediaRecorder = new MediaRecorder(stream);
-  audioChunks = [];
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({ audio: true });
 
-  mediaRecorder.ondataavailable = event => {
-    audioChunks.push(event.data);
-  };
+    mediaRecorder = new MediaRecorder(stream);
+    audioChunks = [];
 
-  mediaRecorder.onstop = () => {
-    const audioBlob = new Blob(audioChunks);
-    const audioUrl = URL.createObjectURL(audioBlob);
-    const audio = document.createElement("audio");
-    audio.src = audioUrl;
-    audio.controls = true;
-    document.body.appendChild(audio);
-  };
+    mediaRecorder.ondataavailable = event => {
+      if (event.data.size > 0) {
+        audioChunks.push(event.data);
+      }
+    };
 
-  mediaRecorder.start();
+    mediaRecorder.onstop = () => {
+      const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+      const audioUrl = URL.createObjectURL(audioBlob);
+
+      const audio = document.createElement("audio");
+      audio.src = audioUrl;
+      audio.controls = true;
+
+      document.body.appendChild(audio);
+
+      // 🔥 stop mic hoàn toàn (quan trọng)
+      stream.getTracks().forEach(track => track.stop());
+    };
+
+    mediaRecorder.start();
+
+    console.log("Recording started");
+  } catch (err) {
+    alert("Microphone error: " + err.message);
+  }
+}
+
+function stopRecording() {
+  if (mediaRecorder && mediaRecorder.state !== "inactive") {
+    mediaRecorder.stop();
+    console.log("Recording stopped");
+  } else {
+    alert("Recorder chưa start hoặc đã stop rồi!");
+  }
 }
 
 function stopRecording() {
