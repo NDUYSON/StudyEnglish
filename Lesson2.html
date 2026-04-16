@@ -1,201 +1,194 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Daily Routine Vocabulary</title>
-  <style>
-    body { font-family: Arial; padding: 20px; }
-    table { border-collapse: collapse; width: 100%; }
-    th, td { border: 1px solid #ccc; padding: 10px; text-align: left; }
-    th { background-color: #f4f4f4; }
-    button { padding: 6px 12px; margin-right: 5px; }
-    .controls { margin-bottom: 15px; }
-    .ipa { color: #555; font-style: italic; }
-    .highlight { background-color: #ffeaa7; }
-    select { padding: 5px; margin-left: 10px; }
-  </style>
+<meta charset="UTF-8">
+<title>Lesson 2 - Conversation Practice</title>
+
+<style>
+body { font-family: Arial; padding: 20px; background:#f5f6fa;}
+.container { max-width: 700px; margin: auto; }
+
+.card {
+  background: white;
+  border-radius: 15px;
+  padding: 25px;
+  margin-top: 20px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.question {
+  font-size: 22px;
+  font-weight: bold;
+}
+
+.answer {
+  margin-top: 15px;
+  color: green;
+  display: none;
+  font-size: 18px;
+}
+
+.controls {
+  margin-top:20px;
+}
+
+.controls button {
+  margin-right: 10px;
+  padding: 10px 18px;
+  border: none;
+  border-radius: 8px;
+  background:#0984e3;
+  color:white;
+  cursor:pointer;
+}
+
+.controls button:hover {
+  background:#74b9ff;
+}
+
+.countdown {
+  font-size: 35px;
+  color: red;
+  margin-top: 10px;
+  font-weight: bold;
+}
+
+.status {
+  margin-top:10px;
+  color:#555;
+}
+</style>
 </head>
+
 <body>
 
-<h2>Daily Routine Vocabulary</h2>
+<div class="container">
+  <h2>🗣 Lesson 2: Daily Conversation</h2>
 
-<div class="controls">
-  <button onclick="playAll()">▶ Play All</button>
-  <button onclick="pauseAll()">⏸ Pause</button>
-  <button onclick="resumeAll()">▶ Resume</button>
-  <button onclick="stopAll()">⏹ Stop</button>
+  <div class="card">
+    <div id="question" class="question">Press Start</div>
+    <div id="countdown" class="countdown"></div>
+    <div id="status" class="status"></div>
+    <div id="answer" class="answer"></div>
+  </div>
 
-  Repeat:
-  <select id="repeatCount">
-    <option value="1">1</option>
-    <option value="2" selected>2</option>
-    <option value="3">3</option>
-  </select>
-
-  Speed:
-  <select id="speedRate">
-    <option value="0.7">Slow</option>
-    <option value="0.9" selected>Normal</option>
-    <option value="1.1">Fast</option>
-  </select>
-
-  <button onclick="startRecording()">🎤 Record</button>
-  <button onclick="stopRecording()">⏹ Stop Rec</button>
+  <div class="controls">
+    <button onclick="startConversation()">▶ Start</button>
+    <button onclick="showAnswer()">👁 Show Answer</button>
+    <button onclick="repeatQuestion()">🔊 Repeat</button>
+    <button onclick="nextQuestion()">➡ Next</button>
+  </div>
 </div>
 
-<table>
-  <thead>
-    <tr>
-      <th>No</th>
-      <th>Word</th>
-      <th>IPA</th>
-      <th>Meaning</th>
-      <th>Example</th>
-      <th>🔊</th>
-    </tr>
-  </thead>
-  <tbody id="vocabTable"></tbody>
-</table>
-
 <script>
-const vocabList = [
-  {word: "wake up", ipa: "/weɪk ʌp/", meaning: "thức dậy", example: "I wake up at 6 a.m."},
-  {word: "get up", ipa: "/ɡet ʌp/", meaning: "ra khỏi giường", example: "I get up quickly."},
-  {word: "brush my teeth", ipa: "/brʌʃ maɪ tiːθ/", meaning: "đánh răng", example: "I brush my teeth every morning."},
-  {word: "have breakfast", ipa: "/hæv ˈbrekfəst/", meaning: "ăn sáng", example: "I have breakfast at 7 a.m."},
-  {word: "go to work", ipa: "/ɡoʊ tuː wɜːrk/", meaning: "đi làm", example: "I go to work at 8 a.m."},
-  {word: "have lunch", ipa: "/hæv lʌntʃ/", meaning: "ăn trưa", example: "I have lunch at noon."},
-  {word: "finish work", ipa: "/ˈfɪnɪʃ wɜːrk/", meaning: "tan làm", example: "I finish work at 5 p.m."},
-  {word: "go home", ipa: "/ɡoʊ hoʊm/", meaning: "về nhà", example: "I go home after work."},
-  {word: "have dinner", ipa: "/hæv ˈdɪnər/", meaning: "ăn tối", example: "I have dinner at 7 p.m."},
-  {word: "watch TV", ipa: "/wɑːtʃ ˌtiːˈviː/", meaning: "xem TV", example: "I watch TV in the evening."},
-  {word: "go to bed", ipa: "/ɡoʊ tuː bed/", meaning: "đi ngủ", example: "I go to bed at 10 p.m."}
+
+const conversations = [
+  { q: "What time do you wake up?", a: "I wake up at 6 a.m." },
+  { q: "What do you do in the morning?", a: "I brush my teeth and have breakfast." },
+  { q: "Do you drink coffee?", a: "Yes, I drink coffee every morning." },
+  { q: "What time do you go to work?", a: "I go to work at 8 a.m." },
+  { q: "What do you do after work?", a: "I go home and cook dinner." },
+  { q: "What do you do at night?", a: "I watch TV and go to bed." },
+
+  { q: "Do you take a shower in the morning?", a: "Yes, I take a shower every morning." },
+  { q: "Do you eat breakfast every day?", a: "Yes, I eat breakfast every day." },
+  { q: "What do you eat for breakfast?", a: "I eat bread and drink coffee." },
+  { q: "Do you check your phone in the morning?", a: "Yes, I check my phone." },
+
+  { q: "How do you go to work?", a: "I go to work by car." },
+  { q: "Do you like your job?", a: "Yes, I like my job." },
+  { q: "What do you do at work?", a: "I work on a computer." },
+  { q: "Do you have lunch at work?", a: "Yes, I have lunch at work." },
+  { q: "What time do you have lunch?", a: "I have lunch at 12 p.m." },
+
+  { q: "Do you take a break at work?", a: "Yes, I take a break in the afternoon." },
+  { q: "What time do you finish work?", a: "I finish work at 5 p.m." },
+  { q: "Do you feel tired after work?", a: "Yes, I feel tired." },
+
+  { q: "What do you do in the evening?", a: "I cook dinner and relax." },
+  { q: "Do you watch TV every day?", a: "Yes, I watch TV every day." },
+  { q: "Do you use your phone at night?", a: "Yes, I use my phone." },
+  { q: "Do you read books?", a: "Yes, I read books sometimes." },
+
+  { q: "What time do you go to bed?", a: "I go to bed at 10 p.m." },
+  { q: "Do you sleep early?", a: "Yes, I sleep early." },
+  { q: "Do you have a busy day?", a: "Yes, I have a busy day." }
 ];
 
-const table = document.getElementById("vocabTable");
+let current = 0;
+let timer;
 
-vocabList.forEach((item, index) => {
-  const row = document.createElement("tr");
-  row.setAttribute("id", "row-" + index);
-
-  row.innerHTML = `
-    <td>${index + 1}</td>
-    <td>${item.word}</td>
-    <td class="ipa">${item.ipa}</td>
-    <td>${item.meaning}</td>
-    <td>${item.example}</td>
-    <td><button onclick="speakOnce('${item.example}')">Play</button></td>
-  `;
-
-  table.appendChild(row);
-});
-
-function getRate() {
-  return parseFloat(document.getElementById("speedRate").value);
+function speak(text) {
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = "en-US";
+  u.rate = 1;
+  speechSynthesis.cancel();
+  speechSynthesis.speak(u);
 }
 
-function getRepeat() {
-  return parseInt(document.getElementById("repeatCount").value);
+function startConversation() {
+  current = 0;
+  loadQuestion();
 }
 
-function speakOnce(text) {
-  const speech = new SpeechSynthesisUtterance(text);
-  speech.lang = 'en-US';
-  speech.rate = getRate();
-  window.speechSynthesis.speak(speech);
+function loadQuestion() {
+  clearInterval(timer);
+
+  document.getElementById("answer").style.display = "none";
+  document.getElementById("answer").innerText = conversations[current].a;
+
+  document.getElementById("question").innerText = conversations[current].q;
+
+  document.getElementById("status").innerText = "Listen carefully...";
+  speak(conversations[current].q);
+
+  startCountdown(3);
 }
 
-let isPlaying = false;
-let currentIndex = 0;
+function startCountdown(sec) {
+  let time = sec;
+  const cd = document.getElementById("countdown");
 
-async function playAll() {
-  stopAll();
-  isPlaying = true;
-  currentIndex = 0;
+  cd.innerText = time;
 
-  while (currentIndex < vocabList.length && isPlaying) {
-    highlightRow(currentIndex);
+  timer = setInterval(() => {
+    time--;
+    cd.innerText = time;
 
-    for (let i = 0; i < getRepeat(); i++) {
-      await speakWithPromise(vocabList[currentIndex].example);
-      await delay(500);
+    if (time <= 0) {
+      clearInterval(timer);
+      cd.innerText = "🎤 Speak now!";
+      document.getElementById("status").innerText = "👉 Say your answer!";
     }
+  }, 1000);
+}
 
-    await delay(2000);
-    currentIndex++;
+function showAnswer() {
+  const ans = document.getElementById("answer");
+  ans.style.display = "block";
+
+  document.getElementById("status").innerText = "Check and repeat";
+
+  speak(ans.innerText);
+}
+
+function repeatQuestion() {
+  speak(conversations[current].q);
+}
+
+function nextQuestion() {
+  current++;
+
+  if (current >= conversations.length) {
+    document.getElementById("question").innerText = "🎉 Done!";
+    document.getElementById("countdown").innerText = "";
+    document.getElementById("status").innerText = "Great job!";
+    return;
   }
 
-  clearHighlight();
+  loadQuestion();
 }
 
-function highlightRow(index) {
-  clearHighlight();
-  const row = document.getElementById("row-" + index);
-  if (row) row.classList.add("highlight");
-}
-
-function clearHighlight() {
-  document.querySelectorAll("tr").forEach(r => r.classList.remove("highlight"));
-}
-
-function pauseAll() {
-  window.speechSynthesis.pause();
-}
-
-function resumeAll() {
-  window.speechSynthesis.resume();
-}
-
-function stopAll() {
-  isPlaying = false;
-  window.speechSynthesis.cancel();
-  clearHighlight();
-}
-
-function speakWithPromise(text) {
-  return new Promise(resolve => {
-    const speech = new SpeechSynthesisUtterance(text);
-    speech.lang = 'en-US';
-    speech.rate = getRate();
-
-    speech.onend = () => resolve();
-
-    window.speechSynthesis.speak(speech);
-  });
-}
-
-function delay(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-// Recording feature
-let mediaRecorder;
-let audioChunks = [];
-
-async function startRecording() {
-  const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-  mediaRecorder = new MediaRecorder(stream);
-  audioChunks = [];
-
-  mediaRecorder.ondataavailable = event => {
-    audioChunks.push(event.data);
-  };
-
-  mediaRecorder.onstop = () => {
-    const audioBlob = new Blob(audioChunks);
-    const audioUrl = URL.createObjectURL(audioBlob);
-    const audio = document.createElement("audio");
-    audio.src = audioUrl;
-    audio.controls = true;
-    document.body.appendChild(audio);
-  };
-
-  mediaRecorder.start();
-}
-
-function stopRecording() {
-  if (mediaRecorder) mediaRecorder.stop();
-}
 </script>
 
 </body>
