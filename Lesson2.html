@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Lesson 2 - Conversation Practice</title>
+<title>Lesson 2 - Conversation Practice PRO</title>
 
 <style>
 body { font-family: Arial; padding: 20px; background:#f5f6fa;}
-.container { max-width: 700px; margin: auto; }
+.container { max-width: 750px; margin: auto; }
 
 .card {
   background: white;
@@ -16,24 +16,12 @@ body { font-family: Arial; padding: 20px; background:#f5f6fa;}
   box-shadow: 0 5px 15px rgba(0,0,0,0.1);
 }
 
-.question {
-  font-size: 22px;
-  font-weight: bold;
-}
+.question { font-size: 22px; font-weight: bold; }
+.answer { margin-top: 15px; color: green; display: none; font-size: 18px; }
 
-.answer {
-  margin-top: 15px;
-  color: green;
-  display: none;
-  font-size: 18px;
-}
-
-.controls {
-  margin-top:20px;
-}
-
+.controls { margin-top:20px; }
 .controls button {
-  margin-right: 10px;
+  margin:5px;
   padding: 10px 18px;
   border: none;
   border-radius: 8px;
@@ -41,10 +29,7 @@ body { font-family: Arial; padding: 20px; background:#f5f6fa;}
   color:white;
   cursor:pointer;
 }
-
-.controls button:hover {
-  background:#74b9ff;
-}
+.controls button:hover { background:#74b9ff; }
 
 .countdown {
   font-size: 35px;
@@ -53,17 +38,14 @@ body { font-family: Arial; padding: 20px; background:#f5f6fa;}
   font-weight: bold;
 }
 
-.status {
-  margin-top:10px;
-  color:#555;
-}
+.status { margin-top:10px; color:#555; }
 </style>
 </head>
 
 <body>
 
 <div class="container">
-  <h2>🗣 Lesson 2: Daily Conversation</h2>
+  <h2>🗣 Lesson 2: Conversation Practice PRO</h2>
 
   <div class="card">
     <div id="question" class="question">Press Start</div>
@@ -74,14 +56,31 @@ body { font-family: Arial; padding: 20px; background:#f5f6fa;}
 
   <div class="controls">
     <button onclick="startConversation()">▶ Start</button>
-    <button onclick="showAnswer()">👁 Show Answer</button>
-    <button onclick="repeatQuestion()">🔊 Repeat</button>
+    <button onclick="showAnswer()">👁 Show</button>
     <button onclick="nextQuestion()">➡ Next</button>
+    <button onclick="repeatQuestion()">🔊 Repeat</button>
+
+    <button onclick="toggleAuto()">🤖 Auto: OFF</button>
+
+    Delay:
+    <select id="delay">
+      <option value="3000">3s</option>
+      <option value="5000" selected>5s</option>
+      <option value="7000">7s</option>
+    </select>
+
+    <button onclick="startRecording()">🎤 Rec</button>
+    <button onclick="stopRecording()">⏹ Stop</button>
+  </div>
+
+  <div class="status">
+    Practiced: <span id="score">0</span> questions
   </div>
 </div>
 
 <script>
 
+// ===== DATA =====
 const conversations = [
   { q: "What time do you wake up?", a: "I wake up at 6 a.m." },
   { q: "What do you do in the morning?", a: "I brush my teeth and have breakfast." },
@@ -89,104 +88,153 @@ const conversations = [
   { q: "What time do you go to work?", a: "I go to work at 8 a.m." },
   { q: "What do you do after work?", a: "I go home and cook dinner." },
   { q: "What do you do at night?", a: "I watch TV and go to bed." },
-
-  { q: "Do you take a shower in the morning?", a: "Yes, I take a shower every morning." },
   { q: "Do you eat breakfast every day?", a: "Yes, I eat breakfast every day." },
-  { q: "What do you eat for breakfast?", a: "I eat bread and drink coffee." },
-  { q: "Do you check your phone in the morning?", a: "Yes, I check my phone." },
-
-  { q: "How do you go to work?", a: "I go to work by car." },
-  { q: "Do you like your job?", a: "Yes, I like my job." },
-  { q: "What do you do at work?", a: "I work on a computer." },
-  { q: "Do you have lunch at work?", a: "Yes, I have lunch at work." },
   { q: "What time do you have lunch?", a: "I have lunch at 12 p.m." },
-
-  { q: "Do you take a break at work?", a: "Yes, I take a break in the afternoon." },
-  { q: "What time do you finish work?", a: "I finish work at 5 p.m." },
-  { q: "Do you feel tired after work?", a: "Yes, I feel tired." },
-
-  { q: "What do you do in the evening?", a: "I cook dinner and relax." },
-  { q: "Do you watch TV every day?", a: "Yes, I watch TV every day." },
-  { q: "Do you use your phone at night?", a: "Yes, I use my phone." },
-  { q: "Do you read books?", a: "Yes, I read books sometimes." },
-
-  { q: "What time do you go to bed?", a: "I go to bed at 10 p.m." },
-  { q: "Do you sleep early?", a: "Yes, I sleep early." },
-  { q: "Do you have a busy day?", a: "Yes, I have a busy day." }
+  { q: "Do you take a break?", a: "Yes, I take a break in the afternoon." },
+  { q: "What time do you go to bed?", a: "I go to bed at 10 p.m." }
 ];
 
+// ===== GLOBAL =====
 let current = 0;
-let timer;
+let autoMode = false;
+let autoTimer = null;
+let score = 0;
 
+// ===== SPEAK =====
 function speak(text) {
   const u = new SpeechSynthesisUtterance(text);
   u.lang = "en-US";
-  u.rate = 1;
   speechSynthesis.cancel();
   speechSynthesis.speak(u);
 }
 
-function startConversation() {
-  current = 0;
-  loadQuestion();
-}
-
+// ===== LOAD =====
 function loadQuestion() {
-  clearInterval(timer);
+  clearTimeout(autoTimer);
+
+  current = Math.floor(Math.random() * conversations.length);
 
   document.getElementById("answer").style.display = "none";
   document.getElementById("answer").innerText = conversations[current].a;
 
   document.getElementById("question").innerText = conversations[current].q;
+  document.getElementById("status").innerText = "Listen...";
 
-  document.getElementById("status").innerText = "Listen carefully...";
   speak(conversations[current].q);
 
   startCountdown(3);
 }
 
+// ===== COUNTDOWN =====
 function startCountdown(sec) {
   let time = sec;
   const cd = document.getElementById("countdown");
 
   cd.innerText = time;
 
-  timer = setInterval(() => {
+  const t = setInterval(() => {
     time--;
     cd.innerText = time;
 
     if (time <= 0) {
-      clearInterval(timer);
-      cd.innerText = "🎤 Speak now!";
-      document.getElementById("status").innerText = "👉 Say your answer!";
+      clearInterval(t);
+      cd.innerText = "🎤 Speak!";
+      document.getElementById("status").innerText = "Say your answer!";
     }
   }, 1000);
+}
+
+// ===== MANUAL =====
+function startConversation() {
+  loadQuestion();
 }
 
 function showAnswer() {
   const ans = document.getElementById("answer");
   ans.style.display = "block";
-
-  document.getElementById("status").innerText = "Check and repeat";
-
   speak(ans.innerText);
+
+  score++;
+  document.getElementById("score").innerText = score;
+}
+
+function nextQuestion() {
+  loadQuestion();
 }
 
 function repeatQuestion() {
   speak(conversations[current].q);
 }
 
-function nextQuestion() {
-  current++;
+// ===== AUTO MODE =====
+function toggleAuto() {
+  autoMode = !autoMode;
 
-  if (current >= conversations.length) {
-    document.getElementById("question").innerText = "🎉 Done!";
-    document.getElementById("countdown").innerText = "";
-    document.getElementById("status").innerText = "Great job!";
-    return;
-  }
+  const btn = document.querySelector("button[onclick='toggleAuto()']");
+  btn.innerText = autoMode ? "🤖 Auto: ON" : "🤖 Auto: OFF";
+
+  if (autoMode) runAuto();
+  else clearTimeout(autoTimer);
+}
+
+function runAuto() {
+  if (!autoMode) return;
 
   loadQuestion();
+
+  const delay = parseInt(document.getElementById("delay").value);
+
+  // show answer
+  autoTimer = setTimeout(() => {
+    showAnswer();
+
+    // next question
+    autoTimer = setTimeout(() => {
+      runAuto();
+    }, delay);
+
+  }, delay);
+}
+
+// ===== RECORD =====
+let mediaRecorder;
+let audioChunks = [];
+let stream;
+
+async function startRecording() {
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+    mediaRecorder = new MediaRecorder(stream);
+    audioChunks = [];
+
+    mediaRecorder.ondataavailable = e => {
+      if (e.data.size > 0) audioChunks.push(e.data);
+    };
+
+    mediaRecorder.onstop = () => {
+      const blob = new Blob(audioChunks);
+      const url = URL.createObjectURL(blob);
+
+      const audio = document.createElement("audio");
+      audio.src = url;
+      audio.controls = true;
+
+      document.body.appendChild(audio);
+
+      stream.getTracks().forEach(t => t.stop());
+    };
+
+    mediaRecorder.start();
+  } catch (err) {
+    alert("Mic error: " + err.message);
+  }
+}
+
+function stopRecording() {
+  if (mediaRecorder && mediaRecorder.state !== "inactive") {
+    mediaRecorder.stop();
+  }
 }
 
 </script>
