@@ -1,201 +1,220 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Daily Routine Vocabulary</title>
-  <style>
-    body { font-family: Arial; padding: 20px; }
-    table { border-collapse: collapse; width: 100%; }
-    th, td { border: 1px solid #ccc; padding: 10px; text-align: left; }
-    th { background-color: #f4f4f4; }
-    button { padding: 6px 12px; margin-right: 5px; }
-    .controls { margin-bottom: 15px; }
-    .ipa { color: #555; font-style: italic; }
-    .highlight { background-color: #ffeaa7; }
-    select { padding: 5px; margin-left: 10px; }
-  </style>
+<meta charset="UTF-8">
+<title>Lesson 3 - Role Play PRO</title>
+
+<style>
+body { font-family: Arial; background:#f5f6fa; padding:20px;}
+.container { max-width:800px; margin:auto; }
+
+.card {
+  background:white;
+  border-radius:15px;
+  padding:20px;
+  margin-top:20px;
+  box-shadow:0 5px 15px rgba(0,0,0,0.1);
+}
+
+.lineA { color:#0984e3; font-weight:bold; margin:10px 0; }
+.lineB { color:green; margin:10px 0; }
+
+.controls button {
+  margin:5px;
+  padding:10px 15px;
+  border:none;
+  border-radius:8px;
+  background:#0984e3;
+  color:white;
+  cursor:pointer;
+}
+
+.countdown {
+  font-size:40px;
+  color:red;
+  font-weight:bold;
+  margin-top:10px;
+}
+
+</style>
 </head>
+
 <body>
 
-<h2>Daily Routine Vocabulary</h2>
+<div class="container">
+
+<h2>🎭 Lesson 3: Role Play PRO</h2>
+
+<div class="card" id="chatBox"></div>
+<div id="countdown" class="countdown"></div>
 
 <div class="controls">
-  <button onclick="playAll()">▶ Play All</button>
-  <button onclick="pauseAll()">⏸ Pause</button>
-  <button onclick="resumeAll()">▶ Resume</button>
-  <button onclick="stopAll()">⏹ Stop</button>
+  <button onclick="start()">▶ Start</button>
+  <button onclick="next()">➡ Next</button>
+  <button onclick="showAnswer()">👁 Show</button>
+  <button onclick="toggleAuto()">🤖 Auto: OFF</button>
 
-  Repeat:
-  <select id="repeatCount">
-    <option value="1">1</option>
-    <option value="2" selected>2</option>
-    <option value="3">3</option>
+  Thinking:
+  <select id="delayQ">
+    <option value="5000">5s</option>
+	<option value="6000">6s</option>
+    <option value="7000">7s</option>
   </select>
 
-  Speed:
-  <select id="speedRate">
-    <option value="0.7">Slow</option>
-    <option value="0.9" selected>Normal</option>
-    <option value="1.1">Fast</option>
+  After Answer:
+  <select id="delayA">
+    <option value="5000">5s</option>
+    <option value="6000">6s</option>
+    <option value="7000">7s</option>
   </select>
-
-  <button onclick="startRecording()">🎤 Record</button>
-  <button onclick="stopRecording()">⏹ Stop Rec</button>
 </div>
 
-<table>
-  <thead>
-    <tr>
-      <th>No</th>
-      <th>Word</th>
-      <th>IPA</th>
-      <th>Meaning</th>
-      <th>Example</th>
-      <th>🔊</th>
-    </tr>
-  </thead>
-  <tbody id="vocabTable"></tbody>
-</table>
+</div>
 
 <script>
-const vocabList = [
-  {word: "wake up", ipa: "/weɪk ʌp/", meaning: "thức dậy", example: "I wake up at 6 a.m."},
-  {word: "get up", ipa: "/ɡet ʌp/", meaning: "ra khỏi giường", example: "I get up quickly."},
-  {word: "brush my teeth", ipa: "/brʌʃ maɪ tiːθ/", meaning: "đánh răng", example: "I brush my teeth every morning."},
-  {word: "have breakfast", ipa: "/hæv ˈbrekfəst/", meaning: "ăn sáng", example: "I have breakfast at 7 a.m."},
-  {word: "go to work", ipa: "/ɡoʊ tuː wɜːrk/", meaning: "đi làm", example: "I go to work at 8 a.m."},
-  {word: "have lunch", ipa: "/hæv lʌntʃ/", meaning: "ăn trưa", example: "I have lunch at noon."},
-  {word: "finish work", ipa: "/ˈfɪnɪʃ wɜːrk/", meaning: "tan làm", example: "I finish work at 5 p.m."},
-  {word: "go home", ipa: "/ɡoʊ hoʊm/", meaning: "về nhà", example: "I go home after work."},
-  {word: "have dinner", ipa: "/hæv ˈdɪnər/", meaning: "ăn tối", example: "I have dinner at 7 p.m."},
-  {word: "watch TV", ipa: "/wɑːtʃ ˌtiːˈviː/", meaning: "xem TV", example: "I watch TV in the evening."},
-  {word: "go to bed", ipa: "/ɡoʊ tuː bed/", meaning: "đi ngủ", example: "I go to bed at 10 p.m."}
+
+
+// ===== DATA (pair A-B) =====
+const pairs = [
+  { q:"What time do you wake up?", a:"I wake up at 6 a.m." },
+  { q:"What do you do in the morning?", a:"I brush my teeth and have breakfast." },
+  { q:"Do you drink coffee?", a:"Yes, I drink coffee every morning." },
+  { q:"What time do you go to work?", a:"I go to work at 8 a.m." },
+  { q:"What do you do after work?", a:"I go home and cook dinner." },
+  { q:"What do you do at night?", a:"I watch TV and go to bed." },
+
+  { q:"Do you take a shower in the morning?", a:"Yes, I take a shower every morning." },
+  { q:"What do you eat for breakfast?", a:"I eat bread and eggs." },
+  { q:"Do you check your phone in the morning?", a:"Yes, I check my phone." },
+  { q:"How do you go to work?", a:"I go to work by car." },
+  { q:"Do you like your job?", a:"Yes, I like my job." },
+  { q:"What do you do at work?", a:"I work on a computer." },
+  { q:"Do you have lunch at work?", a:"Yes, I have lunch at work." },
+  { q:"What time do you have lunch?", a:"I have lunch at 12 p.m." },
+  { q:"Do you take a break in the afternoon?", a:"Yes, I take a break." },
+  { q:"What time do you finish work?", a:"I finish work at 5 p.m." },
+  { q:"Do you feel tired after work?", a:"Yes, I feel tired." },
+  { q:"What do you do in the evening?", a:"I cook dinner and relax." },
+  { q:"Do you read books at night?", a:"Yes, I read books sometimes." },
+  { q:"What time do you go to bed?", a:"I go to bed at 10 p.m." }
 ];
 
-const table = document.getElementById("vocabTable");
 
-vocabList.forEach((item, index) => {
-  const row = document.createElement("tr");
-  row.setAttribute("id", "row-" + index);
+// ===== GLOBAL =====
+let current = 0;
+let autoMode = false;
+let autoTimer = null;
 
-  row.innerHTML = `
-    <td>${index + 1}</td>
-    <td>${item.word}</td>
-    <td class="ipa">${item.ipa}</td>
-    <td>${item.meaning}</td>
-    <td>${item.example}</td>
-    <td><button onclick="speakOnce('${item.example}')">Play</button></td>
-  `;
+let currentAnswer = "";
+let currentAnswerDiv = null;
 
-  table.appendChild(row);
-});
-
-function getRate() {
-  return parseFloat(document.getElementById("speedRate").value);
+// ===== SPEAK =====
+function speak(text) {
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = "en-US";
+  speechSynthesis.cancel();
+  speechSynthesis.speak(u);
 }
 
-function getRepeat() {
-  return parseInt(document.getElementById("repeatCount").value);
+// ===== START =====
+function start() {
+  current = 0;
+  document.getElementById("chatBox").innerHTML = "";
+  load();
 }
 
-function speakOnce(text) {
-  const speech = new SpeechSynthesisUtterance(text);
-  speech.lang = 'en-US';
-  speech.rate = getRate();
-  window.speechSynthesis.speak(speech);
+// ===== LOAD =====
+function load() {
+  clearTimeout(autoTimer);
+
+  const item = pairs[current];
+
+  currentAnswer = item.a;
+
+  const qDiv = document.createElement("div");
+  qDiv.className = "lineA";
+  qDiv.innerText = "A: " + item.q;
+
+  const aDiv = document.createElement("div");
+  aDiv.className = "lineB";
+  aDiv.innerText = "👉 YOU: ???";
+
+  currentAnswerDiv = aDiv;
+
+  const box = document.getElementById("chatBox");
+  box.appendChild(qDiv);
+  box.appendChild(aDiv);
+
+  speak(item.q);
+
+  if (autoMode) runAuto();
 }
 
-let isPlaying = false;
-let currentIndex = 0;
+// ===== COUNTDOWN =====
+function startCountdown(ms, callback) {
+  let time = ms / 1000;
+  const el = document.getElementById("countdown");
 
-async function playAll() {
-  stopAll();
-  isPlaying = true;
-  currentIndex = 0;
+  el.innerText = time;
 
-  while (currentIndex < vocabList.length && isPlaying) {
-    highlightRow(currentIndex);
+  const interval = setInterval(() => {
+    time--;
+    el.innerText = time;
 
-    for (let i = 0; i < getRepeat(); i++) {
-      await speakWithPromise(vocabList[currentIndex].example);
-      await delay(500);
+    if (time <= 0) {
+      clearInterval(interval);
+      el.innerText = "";
+      callback();
     }
-
-    await delay(2000);
-    currentIndex++;
-  }
-
-  clearHighlight();
+  }, 1000);
 }
 
-function highlightRow(index) {
-  clearHighlight();
-  const row = document.getElementById("row-" + index);
-  if (row) row.classList.add("highlight");
-}
+// ===== AUTO =====
+function runAuto() {
+  const delayQ = parseInt(document.getElementById("delayQ").value);
+  const delayA = parseInt(document.getElementById("delayA").value);
 
-function clearHighlight() {
-  document.querySelectorAll("tr").forEach(r => r.classList.remove("highlight"));
-}
+  // ⏱ thinking
+  startCountdown(delayQ, () => {
 
-function pauseAll() {
-  window.speechSynthesis.pause();
-}
+    // show answer
+    showAnswer();
 
-function resumeAll() {
-  window.speechSynthesis.resume();
-}
+    // ⏱ after answer
+    startCountdown(delayA, () => {
+      next();
+    });
 
-function stopAll() {
-  isPlaying = false;
-  window.speechSynthesis.cancel();
-  clearHighlight();
-}
-
-function speakWithPromise(text) {
-  return new Promise(resolve => {
-    const speech = new SpeechSynthesisUtterance(text);
-    speech.lang = 'en-US';
-    speech.rate = getRate();
-
-    speech.onend = () => resolve();
-
-    window.speechSynthesis.speak(speech);
   });
 }
 
-function delay(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+// ===== SHOW =====
+function showAnswer() {
+  if (!currentAnswerDiv) return;
+
+  currentAnswerDiv.innerText = "YOU: " + currentAnswer;
+  speak(currentAnswer);
 }
 
-// Recording feature
-let mediaRecorder;
-let audioChunks = [];
+// ===== NEXT =====
+function next() {
+  current++;
 
-async function startRecording() {
-  const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-  mediaRecorder = new MediaRecorder(stream);
-  audioChunks = [];
+  if (current >= pairs.length) {
+    alert("Done!");
+    return;
+  }
 
-  mediaRecorder.ondataavailable = event => {
-    audioChunks.push(event.data);
-  };
-
-  mediaRecorder.onstop = () => {
-    const audioBlob = new Blob(audioChunks);
-    const audioUrl = URL.createObjectURL(audioBlob);
-    const audio = document.createElement("audio");
-    audio.src = audioUrl;
-    audio.controls = true;
-    document.body.appendChild(audio);
-  };
-
-  mediaRecorder.start();
+  load();
 }
 
-function stopRecording() {
-  if (mediaRecorder) mediaRecorder.stop();
+// ===== AUTO TOGGLE =====
+function toggleAuto() {
+  autoMode = !autoMode;
+  const btn = document.querySelector("button[onclick='toggleAuto()']");
+  btn.innerText = autoMode ? "🤖 Auto: ON" : "🤖 Auto: OFF";
 }
+
 </script>
 
 </body>
