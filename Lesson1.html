@@ -3,16 +3,30 @@
 <head>
 <meta charset="UTF-8">
 <title>Daily Routine Vocabulary</title>
+
 <style>
-  body { font-family: Arial; padding: 20px; }
-  table { border-collapse: collapse; width: 100%; margin-top:20px;}
-  th, td { border: 1px solid #ccc; padding: 10px; text-align: left; }
-  th { background-color: #f4f4f4; }
-  button { padding: 6px 12px; margin-right: 5px; cursor:pointer; }
-  .controls { margin-bottom: 15px; }
-  .ipa { color: #555; font-style: italic; }
-  .highlight { background-color: #ffeaa7; }
-  select { padding: 5px; margin-left: 10px; }
+body { font-family: Arial; padding:20px; }
+table { border-collapse: collapse; width:100%; }
+th,td { border:1px solid #ccc; padding:10px; }
+th { background:#f4f4f4 }
+button { padding:6px 12px; margin-right:5px }
+.ipa { color:#555; font-style:italic }
+.highlight { background:#ffeaa7 }
+
+.practice-q {
+  background:#ffeaa7;
+  padding:10px;
+  border-radius:6px;
+  font-weight:bold;
+}
+
+.practice-a {
+  background:#dfe6e9;
+  padding:10px;
+  border-radius:6px;
+  display:none;
+  color:green;
+}
 </style>
 </head>
 
@@ -28,9 +42,9 @@
 
   Repeat:
   <select id="repeatCount">
-    <option value="1">1</option>
-    <option value="2" selected>2</option>
-    <option value="3">3</option>
+    <option>1</option>
+    <option selected>2</option>
+    <option>3</option>
   </select>
 
   Speed:
@@ -41,36 +55,36 @@
     <option value="1.0" selected>Normal 1.0</option>
     <option value="1.1">Fast 1.1</option>
   </select>
+
+  <button onclick="startRecording()">🎤 Record</button>
+  <button onclick="stopRecording()">⏹ Stop Rec</button>
 </div>
 
 <table>
-  <thead>
-    <tr>
-      <th>No</th>
-      <th>Word</th>
-      <th>IPA</th>
-      <th>Meaning</th>
-      <th>Example</th>
-      <th>🔊</th>
-    </tr>
-  </thead>
-  <tbody id="vocabTable"></tbody>
+<thead>
+<tr>
+<th>No</th><th>Word</th><th>IPA</th><th>Meaning</th><th>Example</th><th>🔊</th>
+</tr>
+</thead>
+<tbody id="vocabTable"></tbody>
 </table>
 
 <hr>
 
 <h2>🧠 Practice Speaking (Phản xạ)</h2>
 
-<div style="margin-top:20px;">
-  <button onclick="startPractice()">▶ Start Practice</button>
-  <button onclick="showAnswer()">👁 Show Answer</button>
-</div>
+<button onclick="startPractice()">▶ Start Practice</button>
+<button onclick="showPracticeAnswer()">👁 Show Answer</button>
 
-<div id="question" style="margin-top:20px; font-size:20px; font-weight:bold;"></div>
-<div id="answer" style="margin-top:10px; color:green; display:none;"></div>
+<div id="practiceQuestion" style="margin-top:20px"></div>
+<div id="practiceAnswer" style="margin-top:10px"></div>
+
+<hr>
+<h3>🎧 Recordings</h3>
+<div id="recordings"></div>
 
 <script>
-// ======================= VOCAB DATA =======================
+// ========== DATA ==========
 const vocabList = [
   {word: "wake up", ipa: "/weɪk ʌp/", meaning: "thức dậy", example: "I wake up at 6 a.m."},
   {word: "get up", ipa: "/ɡet ʌp/", meaning: "ra khỏi giường", example: "I usually get up quickly every morning."},
@@ -94,86 +108,129 @@ const vocabList = [
   {word: "go to bed", ipa: "/ɡoʊ tuː bed/", meaning: "đi ngủ", example: "I go to bed at around 11 P.M."}
 ];
 
-// ======================= TABLE =======================
+// ========== TABLE ==========
 const table = document.getElementById("vocabTable");
-vocabList.forEach((item, idx) => {
-  const tr = document.createElement("tr");
-  tr.innerHTML = `
-    <td>${idx+1}</td>
-    <td>${item.word}</td>
-    <td class="ipa">${item.ipa}</td>
-    <td>${item.meaning}</td>  
-    <td>${item.example}</td>
-    <td><button onclick="speakOnce('${item.example}')">Play</button></td>
-  `;
+vocabList.forEach((v,i)=>{
+  const tr=document.createElement("tr");
+  tr.id="row-"+i;
+  tr.innerHTML=`
+    <td>${i+1}</td><td>${v.word}</td>
+    <td class="ipa">${v.ipa}</td>
+    <td>${v.meaning}</td>
+    <td>${v.example}</td>
+    <td><button onclick="speak('${v.example}')">Play</button></td>`;
   table.appendChild(tr);
 });
 
-// ======================= SPEAK =======================
-function getRate() {
-  return parseFloat(document.getElementById("speedRate").value);
+// ========== SPEAK ==========
+function rate(){return +document.getElementById("speedRate").value}
+function speak(t){
+  const u=new SpeechSynthesisUtterance(t);
+  u.lang="en-US"; u.rate=rate();
+  speechSynthesis.cancel(); speechSynthesis.speak(u);
 }
 
-function speakOnce(text) {
-  const u = new SpeechSynthesisUtterance(text);
-  u.lang = "en-US";
-  u.rate = getRate();
-  speechSynthesis.cancel();
-  speechSynthesis.speak(u);
-}
-
-// ======================= PRACTICE SETS (FIX CỐT LÕI) =======================
-
-const practiceSets = [
-  {
-    question: "What do you do in the morning?",
-    answers: [0,1,2,3,4,5,6]
-  },
-  {
-    question: "What do you do during the day?",
-    answers: [7,8,9,10,11]
-  },
-  {
-    question: "What do you do after work?",
-    answers: [12,13,14,15]
-  },
-  {
-    question: "What do you do at night?",
-    answers: [16,17,18,19]
+// ========== PLAY ALL ==========
+let playing=false, idx=0;
+async function playAll(){
+  stopAll(); playing=true; idx=0;
+  while(idx<vocabList.length && playing){
+    highlight(idx);
+    for(let i=0;i<+repeatCount.value;i++){
+      await speakAsync(vocabList[idx].example);
+    }
+    idx++;
   }
-];
-
-let currentPractice = null;
-let currentAnswerText = "";
-
-// ======================= START PRACTICE =======================
-function startPractice() {
-  document.getElementById("answer").style.display = "none";
-
-  // chọn practice set
-  currentPractice = practiceSets[
-    Math.floor(Math.random() * practiceSets.length)
-  ];
-
-  // chọn answer hợp lệ
-  const answerIndex =
-    currentPractice.answers[
-      Math.floor(Math.random() * currentPractice.answers.length)
-    ];
-
-  currentAnswerText = vocabList[answerIndex].example;
-
-  document.getElementById("question").innerText = currentPractice.question;
-  document.getElementById("answer").innerText = currentAnswerText;
-
-  speakOnce(currentPractice.question);
+  clearHighlight();
+}
+function pauseAll(){speechSynthesis.pause()}
+function resumeAll(){speechSynthesis.resume()}
+function stopAll(){playing=false; speechSynthesis.cancel(); clearHighlight()}
+function highlight(i){
+  clearHighlight();
+  document.getElementById("row-"+i)?.classList.add("highlight");
+}
+function clearHighlight(){
+ document.querySelectorAll("tr").forEach(r=>r.classList.remove("highlight"));
+}
+function speakAsync(t){
+ return new Promise(res=>{
+  const u=new SpeechSynthesisUtterance(t);
+  u.lang="en-US"; u.onend=res; speechSynthesis.speak(u);
+ });
 }
 
-// ======================= SHOW ANSWER =======================
-function showAnswer() {
-  const answer = document.getElementById("answer");
-  answer.style.display = "block";
-  speakOnce(currentAnswerText);
+// ========== RECORD ==========
+let mediaRecorder, chunks=[], meta=null;
+async function startRecording(){
+ const s=await navigator.mediaDevices.getUserMedia({audio:true});
+ mediaRecorder=new MediaRecorder(s);
+ chunks=[];
+ meta=practiceState;
+ mediaRecorder.ondataavailable=e=>chunks.push(e.data);
+ mediaRecorder.onstop=()=>{
+  const url=URL.createObjectURL(new Blob(chunks));
+  const d=document.createElement("div");
+  d.innerHTML=`<p>${meta?.question||"Vocabulary"}</p>${url}</audio>`;
+  recordings.appendChild(d);
+  s.getTracks().forEach(t=>t.stop());
+ };
+ mediaRecorder.start();
+}
+function stopRecording(){
+ if(mediaRecorder&&mediaRecorder.state!=="inactive")mediaRecorder.stop();
+}
+
+// ========== PRACTICE ==========
+// ========== PRACTICE ==========
+const practiceMap = {
+  morning: {
+    q: "What do you do in the morning?",
+    ids: [0, 1, 2, 3, 5, 6, 9]
+  },
+
+  day: {
+    q: "What do you do during the day?",
+    ids: [7, 8, 10, 11]
+  },
+
+  after: {
+    q: "What do you do after work?",
+    ids: [4, 12, 13, 14, 15]
+  },
+
+  night: {
+    q: "What do you do at night?",
+    ids: [16, 17, 18, 19]
+  }
+};
+
+let practiceState=null;
+
+function startPractice(){
+ const keys=Object.keys(practiceMap);
+ const key=keys[Math.floor(Math.random()*keys.length)];
+ const set=practiceMap[key];
+ const id=set.ids[Math.floor(Math.random()*set.ids.length)];
+
+ practiceState={
+  question:set.q,
+  answer:vocabList[id].example
+ };
+
+ practiceQuestion.className="practice-q";
+ practiceAnswer.className="practice-a";
+ practiceAnswer.style.display="none";
+
+ practiceQuestion.innerText=practiceState.question;
+ practiceAnswer.innerText=practiceState.answer;
+
+ speak(practiceState.question);
+}
+
+function showPracticeAnswer(){
+ practiceAnswer.style.display="block";
+ speak(practiceState.answer);
 }
 </script>
 
