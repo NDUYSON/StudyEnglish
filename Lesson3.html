@@ -5,15 +5,8 @@
 <title>Lesson 3 - Role Play PRO</title>
 
 <style>
-body {
-  font-family: Arial, sans-serif;
-  background:#f5f6fa;
-  padding:20px;
-}
-.container {
-  max-width:800px;
-  margin:auto;
-}
+body { font-family: Arial; background:#f5f6fa; padding:20px; }
+.container { max-width:800px; margin:auto; }
 .card {
   background:white;
   border-radius:15px;
@@ -21,29 +14,17 @@ body {
   margin-top:20px;
   box-shadow:0 5px 15px rgba(0,0,0,0.1);
 }
-.lineA {
-  color:#0984e3;
-  font-weight:bold;
-  margin:10px 0;
-}
-.lineB {
-  color:green;
-  margin:10px 0;
-}
+.lineA { color:#0984e3; font-weight:bold; margin:10px 0; }
+.lineB { color:green; margin:10px 0; }
+.highlight { background:#ffeaa7; padding:5px; border-radius:6px; }
 .controls button {
-  margin:5px;
-  padding:10px 15px;
-  border:none;
-  border-radius:8px;
-  background:#0984e3;
-  color:white;
-  cursor:pointer;
+  margin:5px; padding:10px 15px;
+  border:none; border-radius:8px;
+  background:#0984e3; color:white;
 }
 .countdown {
-  font-size:40px;
-  color:red;
-  font-weight:bold;
-  margin-top:10px;
+  font-size:40px; color:red;
+  font-weight:bold; margin-top:10px;
 }
 </style>
 </head>
@@ -64,12 +45,14 @@ body {
 
   <br><br>
 
-  <!-- 🔥 SPEED SLIDER -->
   Speed:
-  <input type="range" id="speedSlider" min="0.3" max="1.5" step="0.1" value="1">
+  <input type="range" id="speedSlider" min="0.3" max="1.5" step="0.1" value="0.5">
   <span id="speedValue">1.0</span>
 
-  
+  Voice:
+  <select id="voiceSelect"></select>
+
+  <br><br>
 
   Thinking:
   <select id="delayQ">
@@ -93,7 +76,7 @@ body {
 <script>
 
 // ===== DATA =====
-const pairs = [
+const pairs = [ /* giữ nguyên database của bạn */ 
   { q:"What time do you wake up?", a:"I wake up at around 6 A.M." },
   { q:"What do you do in the morning?", a:"I brush my teeth, wash my face and then have breakfast with my children at around 7:15 A.M." },
   { q:"Do you drink coffee?", a:"Yes, I do. I always drink coffee every morning." },
@@ -119,127 +102,108 @@ const pairs = [
 // ===== GLOBAL =====
 let current = 0;
 let autoMode = false;
-let autoTimer = null;
 let currentAnswer = "";
 let currentAnswerDiv = null;
 
 // ===== SPEED =====
-const speedSlider = document.getElementById("speedSlider");
-const speedValue = document.getElementById("speedValue");
+speedSlider.oninput = () => speedValue.innerText = speedSlider.value;
+function getRate(){ return parseFloat(speedSlider.value); }
 
-speedSlider.oninput = () => {
-  speedValue.innerText = speedSlider.value;
-};
-
-function getRate(){
-  return parseFloat(speedSlider.value);
+// ===== VOICE =====
+let voices = [];
+function loadVoices(){
+  const all = speechSynthesis.getVoices();
+  voices = all.filter(v => v.lang==="en-US");
+  voiceSelect.innerHTML="";
+  voices.forEach((v,i)=>{
+    const opt=document.createElement("option");
+    opt.value=i;
+    opt.text=(v.lang==="en-US"?"🇺🇸":"🇬🇧")+" "+v.name;
+    voiceSelect.appendChild(opt);
+  });
 }
+speechSynthesis.onvoiceschanged=loadVoices;
+setTimeout(loadVoices,500);
 
 // ===== SPEAK =====
-function speak(text, onEnd = null) {
-  const u = new SpeechSynthesisUtterance(text);
-  u.lang = "en-US";
-  u.rate = getRate(); // 🔥 áp dụng speed
-
-  if (onEnd) u.onend = onEnd;
-
+function speak(text,onEnd=null){
+  const u=new SpeechSynthesisUtterance(text);
+  u.rate=getRate();
+  if(voices[voiceSelect.value]) u.voice=voices[voiceSelect.value];
+  if(onEnd) u.onend=onEnd;
   speechSynthesis.cancel();
   speechSynthesis.speak(u);
 }
 
 // ===== START =====
-function start() {
-  current = 0;
-  document.getElementById("chatBox").innerHTML = "";
+function start(){
+  current=0;
+  chatBox.innerHTML="";
   load();
 }
 
 // ===== LOAD =====
-function load() {
-  clearTimeout(autoTimer);
+function load(){
+  const item=pairs[current];
+  currentAnswer=item.a;
 
-  const item = pairs[current];
-  currentAnswer = item.a;
+  const q=document.createElement("div");
+  q.className="lineA highlight";
+  q.innerText="A: "+item.q;
 
-  const qDiv = document.createElement("div");
-  qDiv.className = "lineA";
-  qDiv.innerText = "A: " + item.q;
+  const a=document.createElement("div");
+  a.className="lineB";
+  a.innerText="👉 YOU: ???";
 
-  const aDiv = document.createElement("div");
-  aDiv.className = "lineB";
-  aDiv.innerText = "👉 YOU: ???";
+  currentAnswerDiv=a;
 
-  currentAnswerDiv = aDiv;
+  chatBox.appendChild(q);
+  chatBox.appendChild(a);
 
-  const box = document.getElementById("chatBox");
-  box.appendChild(qDiv);
-  box.appendChild(aDiv);
-
-  speak(item.q, () => {
-    if (autoMode) runAuto();
-  });
+  speak(item.q,()=>{ if(autoMode) runAuto(); });
 }
 
 // ===== COUNTDOWN =====
-function startCountdown(ms, callback) {
-  let time = ms / 1000;
-  const el = document.getElementById("countdown");
-  el.innerText = time;
-
-  const interval = setInterval(() => {
-    time--;
-    el.innerText = time;
-
-    if (time <= 0) {
-      clearInterval(interval);
-      el.innerText = "";
-      callback();
-    }
-  }, 1000);
+function startCountdown(ms,cb){
+  let t=ms/1000;
+  countdown.innerText=t;
+  const i=setInterval(()=>{
+    t--;
+    countdown.innerText=t;
+    if(t<=0){ clearInterval(i); countdown.innerText=""; cb(); }
+  },1000);
 }
 
 // ===== AUTO =====
-function runAuto() {
-  const delayQ = parseInt(document.getElementById("delayQ").value);
-  const delayA = parseInt(document.getElementById("delayA").value);
+function runAuto(){
+  const dQ=+delayQ.value;
+  const dA=+delayA.value;
 
-  startCountdown(delayQ, () => {
-    showAnswerAuto(delayA);
-  });
-}
-
-function showAnswerAuto(delayA) {
-  currentAnswerDiv.innerText = "YOU: " + currentAnswer;
-
-  speak(currentAnswer, () => {
-    startCountdown(delayA, () => {
-      next();
+  startCountdown(dQ,()=>{
+    currentAnswerDiv.innerText="YOU: "+currentAnswer;
+    speak(currentAnswer,()=>{
+      startCountdown(dA,next);
     });
   });
 }
 
 // ===== MANUAL =====
-function showAnswer() {
-  if (!currentAnswerDiv) return;
-  currentAnswerDiv.innerText = "YOU: " + currentAnswer;
+function showAnswer(){
+  currentAnswerDiv.innerText="YOU: "+currentAnswer;
   speak(currentAnswer);
 }
 
 // ===== NEXT =====
-function next() {
+function next(){
   current++;
-  if (current >= pairs.length) {
-    alert("✅ Lesson Completed!");
-    return;
-  }
+  if(current>=pairs.length){ alert("Done"); return; }
   load();
 }
 
-// ===== AUTO TOGGLE =====
-function toggleAuto() {
-  autoMode = !autoMode;
-  const btn = document.querySelector("button[onclick='toggleAuto()']");
-  btn.innerText = autoMode ? "🤖 Auto: ON" : "🤖 Auto: OFF";
+// ===== TOGGLE =====
+function toggleAuto(){
+  autoMode=!autoMode;
+  event.target.innerText=autoMode?"🤖 Auto: ON":"🤖 Auto: OFF";
 }
 
 </script>
