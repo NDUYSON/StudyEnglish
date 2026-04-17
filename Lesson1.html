@@ -47,14 +47,14 @@ button { padding:6px 12px; margin-right:5px }
     <option>3</option>
   </select>
 
+  <!-- 🔥 NEW SPEED SLIDER -->
   Speed:
-  <select id="speedRate">
-    <option value="0.3">Slow 0.3</option>
-    <option value="0.5">Slow 0.5</option>
-    <option value="0.8">Slow 0.8</option>
-    <option value="1.0" selected>Normal 1.0</option>
-    <option value="1.1">Fast 1.1</option>
-  </select>
+  <input type="range" id="speedSlider" min="0.5" max="1.5" step="0.1" value="1">
+  <span id="speedValue">1.0</span>
+
+  <!-- 🔥 NEW VOICE SELECT -->
+  Voice:
+  <select id="voiceSelect"></select>
 
   <button onclick="startRecording()">🎤 Record</button>
   <button onclick="stopRecording()">⏹ Stop Rec</button>
@@ -71,7 +71,7 @@ button { padding:6px 12px; margin-right:5px }
 
 <hr>
 
-<h2>🧠 Practice Speaking (Phản xạ)</h2>
+<h2>🧠 Practice Speaking</h2>
 
 <button onclick="startPractice()">▶ Start Practice</button>
 <button onclick="showPracticeAnswer()">👁 Show Answer</button>
@@ -84,37 +84,39 @@ button { padding:6px 12px; margin-right:5px }
 <div id="recordings"></div>
 
 <script>
-// ========== DATA ==========
+
+// ===== DATA =====
 const vocabList = [
-  {word: "wake up", ipa: "/weɪk ʌp/", meaning: "thức dậy", example: "I wake up at 6 a.m."},
-  {word: "get up", ipa: "/ɡet ʌp/", meaning: "ra khỏi giường", example: "I usually get up quickly every morning."},
-  {word: "brush my teeth", ipa: "/brʌʃ maɪ tiːθ/", meaning: "đánh răng", example: "I brush my teeth after waking up every day."},
-  {word: "wash my face", ipa: "/wɑːʃ maɪ feɪs/", meaning: "rửa mặt", example: "I wash my face after waking up."},
-  {word: "take a shower", ipa: "/teɪk ə ˈʃaʊər/", meaning: "tắm", example: "I take a shower after work everyday."},
-  {word: "have breakfast", ipa: "/hæv ˈbrekfəst/", meaning: "ăn sáng", example: "I have breakfast at around 7 A.M every morning."},
-  {word: "drink coffee", ipa: "/drɪŋk ˈkɔːfi/", meaning: "uống cà phê", example: "I drink coffee every morning."},
-  {word: "go to work", ipa: "/ɡoʊ tuː wɜːrk/", meaning: "đi làm", example: "I go to work at around 8 A.M by car."},
-  {word: "start work", ipa: "/stɑːrt wɜːrk/", meaning: "bắt đầu làm việc", example: "I start work at 8:30 A.M."},
-  {word: "check emails", ipa: "/tʃek ˈiːmeɪlz/", meaning: "kiểm tra email", example: "I check emails in the morning."},
-  {word: "have lunch", ipa: "/hæv lʌntʃ/", meaning: "ăn trưa", example: "I have lunch at noon in company."},
-  {word: "take a break", ipa: "/teɪk ə breɪk/", meaning: "nghỉ giải lao", example: "I take a break at around 3 P.M."},
-  {word: "finish work", ipa: "/ˈfɪnɪʃ wɜːrk/", meaning: "tan làm", example: "I finish work at 5:30 P.M."},
-  {word: "go home", ipa: "/ɡoʊ hoʊm/", meaning: "về nhà", example: "I always go home after work."},
-  {word: "cook dinner", ipa: "/kʊk ˈdɪnər/", meaning: "nấu ăn tối", example: "I cook dinner in the evening."},
-  {word: "have dinner", ipa: "/hæv ˈdɪnər/", meaning: "ăn tối", example: "I have dinner at around 7 P.M."},
-  {word: "watch TV", ipa: "/wɑːtʃ ˌtiːˈviː/", meaning: "xem TV", example: "I watch TV after dinner."},
-  {word: "use my phone", ipa: "/juːz maɪ foʊn/", meaning: "dùng điện thoại", example: "I use my phone before bed."},
-  {word: "read a book", ipa: "/riːd ə bʊk/", meaning: "đọc sách", example: "I read a book at night."},
-  {word: "go to bed", ipa: "/ɡoʊ tuː bed/", meaning: "đi ngủ", example: "I go to bed at around 11 P.M."}
+  {word:"wake up", ipa:"/weɪk ʌp/", meaning:"thức dậy", example:"I wake up at 6 a.m."},
+  {word:"get up", ipa:"/ɡet ʌp/", meaning:"ra khỏi giường", example:"I usually get up quickly every morning."},
+  {word:"brush my teeth", ipa:"/brʌʃ maɪ tiːθ/", meaning:"đánh răng", example:"I brush my teeth after waking up every day."},
+  {word:"wash my face", ipa:"/wɑːʃ maɪ feɪs/", meaning:"rửa mặt", example:"I wash my face after waking up."},
+  {word:"take a shower", ipa:"/teɪk ə ˈʃaʊər/", meaning:"tắm", example:"I take a shower after work everyday."},
+  {word:"have breakfast", ipa:"/hæv ˈbrekfəst/", meaning:"ăn sáng", example:"I have breakfast at around 7 A.M every morning."},
+  {word:"drink coffee", ipa:"/drɪŋk ˈkɔːfi/", meaning:"uống cà phê", example:"I drink coffee every morning."},
+  {word:"go to work", ipa:"/ɡoʊ tuː wɜːrk/", meaning:"đi làm", example:"I go to work at around 8 A.M by car."},
+  {word:"start work", ipa:"/stɑːrt wɜːrk/", meaning:"bắt đầu làm việc", example:"I start work at 8:30 A.M."},
+  {word:"check emails", ipa:"/tʃek ˈiːmeɪlz/", meaning:"kiểm tra email", example:"I check emails in the morning."},
+  {word:"have lunch", ipa:"/hæv lʌntʃ/", meaning:"ăn trưa", example:"I have lunch at noon in company."},
+  {word:"take a break", ipa:"/teɪk ə breɪk/", meaning:"nghỉ giải lao", example:"I take a break at around 3 P.M."},
+  {word:"finish work", ipa:"/ˈfɪnɪʃ wɜːrk/", meaning:"tan làm", example:"I finish work at 5:30 P.M."},
+  {word:"go home", ipa:"/ɡoʊ hoʊm/", meaning:"về nhà", example:"I always go home after work."},
+  {word:"cook dinner", ipa:"/kʊk ˈdɪnər/", meaning:"nấu ăn tối", example:"I cook dinner in the evening."},
+  {word:"have dinner", ipa:"/hæv ˈdɪnər/", meaning:"ăn tối", example:"I have dinner at around 7 P.M."},
+  {word:"watch TV", ipa:"/wɑːtʃ ˌtiːˈviː/", meaning:"xem TV", example:"I watch TV after dinner."},
+  {word:"use my phone", ipa:"/juːz maɪ foʊn/", meaning:"dùng điện thoại", example:"I use my phone before bed."},
+  {word:"read a book", ipa:"/riːd ə bʊk/", meaning:"đọc sách", example:"I read a book at night."},
+  {word:"go to bed", ipa:"/ɡoʊ tuː bed/", meaning:"đi ngủ", example:"I go to bed at around 11 P.M."}
 ];
 
-// ========== TABLE ==========
+// ===== TABLE =====
 const table = document.getElementById("vocabTable");
 vocabList.forEach((v,i)=>{
   const tr=document.createElement("tr");
   tr.id="row-"+i;
   tr.innerHTML=`
-    <td>${i+1}</td><td>${v.word}</td>
+    <td>${i+1}</td>
+    <td>${v.word}</td>
     <td class="ipa">${v.ipa}</td>
     <td>${v.meaning}</td>
     <td>${v.example}</td>
@@ -122,15 +124,66 @@ vocabList.forEach((v,i)=>{
   table.appendChild(tr);
 });
 
-// ========== SPEAK ==========
-function rate(){return +document.getElementById("speedRate").value}
-function speak(t){
-  const u=new SpeechSynthesisUtterance(t);
-  u.lang="en-US"; u.rate=rate();
-  speechSynthesis.cancel(); speechSynthesis.speak(u);
+// ===== VOICE =====
+let voices=[];
+function loadVoices(){
+  const allVoices = speechSynthesis.getVoices();
+
+  // 🔥 chỉ giữ US + UK
+  voices = allVoices.filter(v =>
+    v.lang === "en-US"// || v.lang === "en-GB"
+  );
+
+  const select = document.getElementById("voiceSelect");
+  select.innerHTML = "";
+
+  voices.forEach((v,i)=>{
+    const option = document.createElement("option");
+    option.value = i;
+
+    // hiển thị đẹp hơn
+    const country = v.lang === "en-US" ? "🇺🇸 US" : "🇬🇧 UK";
+
+    option.text = `${country} - ${v.name}`;
+    select.appendChild(option);
+  });
+}
+speechSynthesis.onvoiceschanged=loadVoices;
+
+// ===== SPEED =====
+const speedSlider=document.getElementById("speedSlider");
+const speedValue=document.getElementById("speedValue");
+
+speedSlider.oninput=()=>speedValue.innerText=speedSlider.value;
+
+function rate(){ return parseFloat(speedSlider.value); }
+
+// ===== SPEAK =====
+function createSpeech(text){
+  const u=new SpeechSynthesisUtterance(text);
+  u.lang="en-US";
+  u.rate=rate();
+
+  const vIndex=document.getElementById("voiceSelect").value;
+  if(voices[vIndex]) u.voice=voices[vIndex];
+
+  return u;
 }
 
-// ========== PLAY ALL ==========
+function speak(t){
+  speechSynthesis.cancel();
+  speechSynthesis.speak(createSpeech(t));
+}
+
+function speakAsync(t){
+  return new Promise(res=>{
+    const u=createSpeech(t);
+    u.onend=res;
+    speechSynthesis.speak(u);
+  });
+}
+
+// ===== PLAY ALL =====
 let playing=false, idx=0;
 async function playAll(){
   stopAll(); playing=true; idx=0;
@@ -143,9 +196,12 @@ async function playAll(){
   }
   clearHighlight();
 }
+
 function pauseAll(){speechSynthesis.pause()}
 function resumeAll(){speechSynthesis.resume()}
 function stopAll(){playing=false; speechSynthesis.cancel(); clearHighlight()}
+
+// ===== UI =====
 function highlight(i){
   clearHighlight();
   document.getElementById("row-"+i)?.classList.add("highlight");
@@ -153,66 +209,43 @@ function highlight(i){
 function clearHighlight(){
  document.querySelectorAll("tr").forEach(r=>r.classList.remove("highlight"));
 }
-function speakAsync(t){
- return new Promise(res=>{
-  const u=new SpeechSynthesisUtterance(t);
-  u.lang="en-US";
-  u.rate = rate(); // 🔥 THÊM DÒNG NÀY
-  u.onend = res;
-  speechSynthesis.speak(u);
- });
-}
 
-// ========== RECORD ==========
-let mediaRecorder, chunks=[], meta=null;
+// ===== RECORD =====
+let mediaRecorder,chunks=[],meta=null;
 async function startRecording(){
  const s=await navigator.mediaDevices.getUserMedia({audio:true});
  mediaRecorder=new MediaRecorder(s);
  chunks=[];
  meta=practiceState;
+
  mediaRecorder.ondataavailable=e=>chunks.push(e.data);
  mediaRecorder.onstop=()=>{
   const url=URL.createObjectURL(new Blob(chunks));
   const d=document.createElement("div");
-  d.innerHTML=`<p>${meta?.question||"Vocabulary"}</p>${url}</audio>`;
+  d.innerHTML=`<p>${meta?.question||"Vocabulary"}</p><audio src="${url}" controls></audio>`;
   recordings.appendChild(d);
   s.getTracks().forEach(t=>t.stop());
  };
  mediaRecorder.start();
 }
+
 function stopRecording(){
  if(mediaRecorder&&mediaRecorder.state!=="inactive")mediaRecorder.stop();
 }
 
-// ========== PRACTICE ==========
-const practiceMap = {
-  morning: {
-    q: "What do you do in the morning?",
-    ids: [0, 1, 2, 3, 5, 6, 9]
-  },
-
-  day: {
-    q: "What do you do during the day?",
-    ids: [7, 8, 10, 11]
-  },
-
-  after: {
-    q: "What do you do after work?",
-    ids: [4, 12, 13, 14, 15]
-  },
-
-  night: {
-    q: "What do you do at night?",
-    ids: [16, 17, 18, 19]
-  }
+// ===== PRACTICE =====
+const practiceMap={
+ morning:{q:"What do you do in the morning?",ids:[0,1,2,3,5,6,9]},
+ day:{q:"What do you do during the day?",ids:[7,8,10,11]},
+ after:{q:"What do you do after work?",ids:[4,12,13,14,15]},
+ night:{q:"What do you do at night?",ids:[16,17,18,19]}
 };
 
 let practiceState=null;
 
 function startPractice(){
  const keys=Object.keys(practiceMap);
- const key=keys[Math.floor(Math.random()*keys.length)];
- const set=practiceMap[key];
+ const set=practiceMap[keys[Math.floor(Math.random()*keys.length)]];
  const id=set.ids[Math.floor(Math.random()*set.ids.length)];
 
  practiceState={
@@ -234,6 +267,7 @@ function showPracticeAnswer(){
  practiceAnswer.style.display="block";
  speak(practiceState.answer);
 }
+
 </script>
 
 </body>
