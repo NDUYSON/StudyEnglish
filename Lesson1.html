@@ -1,20 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Daily Routine Vocabulary</title>
-  <style>
-    body { font-family: Arial; padding: 20px; }
-    table { border-collapse: collapse; width: 100%; }
-    th, td { border: 1px solid #ccc; padding: 10px; text-align: left; }
-    th { background-color: #f4f4f4; }
-    button { padding: 6px 12px; margin-right: 5px; }
-    .controls { margin-bottom: 15px; }
-    .ipa { color: #555; font-style: italic; }
-    .highlight { background-color: #ffeaa7; }
-    select { padding: 5px; margin-left: 10px; }
-  </style>
+<meta charset="UTF-8">
+<title>Daily Routine Vocabulary</title>
+<style>
+  body { font-family: Arial; padding: 20px; }
+  table { border-collapse: collapse; width: 100%; margin-top:20px;}
+  th, td { border: 1px solid #ccc; padding: 10px; text-align: left; }
+  th { background-color: #f4f4f4; }
+  button { padding: 6px 12px; margin-right: 5px; cursor:pointer; }
+  .controls { margin-bottom: 15px; }
+  .ipa { color: #555; font-style: italic; }
+  .highlight { background-color: #ffeaa7; }
+  select { padding: 5px; margin-left: 10px; }
+</style>
 </head>
+
 <body>
 
 <h2>Daily Routine Vocabulary</h2>
@@ -34,15 +35,12 @@
 
   Speed:
   <select id="speedRate">
-    <option value="0.3">0.3</option>
-    <option value="0.5">0.5</option>
-    <option value="0.8">0.8</option>
-    <option value="1.0" selected>1.0</option>
-    <option value="1.1">1.1</option>
+    <option value="0.3">Slow 0.3</option>
+    <option value="0.5">Slow 0.5</option>
+    <option value="0.8">Slow 0.8</option>
+    <option value="1.0" selected>Normal 1.0</option>
+    <option value="1.1">Fast 1.1</option>
   </select>
-
-  <button onclick="startRecording()">🎤 Record</button>
-  <button onclick="stopRecording()">⏹ Stop Rec</button>
 </div>
 
 <table>
@@ -59,6 +57,8 @@
   <tbody id="vocabTable"></tbody>
 </table>
 
+<hr>
+
 <h2>🧠 Practice Speaking (Phản xạ)</h2>
 
 <div style="margin-top:20px;">
@@ -70,6 +70,7 @@
 <div id="answer" style="margin-top:10px; color:green; display:none;"></div>
 
 <script>
+// ======================= VOCAB DATA =======================
 const vocabList = [
   {word: "wake up", ipa: "/weɪk ʌp/", meaning: "thức dậy", example: "I wake up at 6 a.m."},
   {word: "get up", ipa: "/ɡet ʌp/", meaning: "ra khỏi giường", example: "I usually get up quickly every morning."},
@@ -93,173 +94,86 @@ const vocabList = [
   {word: "go to bed", ipa: "/ɡoʊ tuː bed/", meaning: "đi ngủ", example: "I go to bed at around 11 P.M."}
 ];
 
+// ======================= TABLE =======================
 const table = document.getElementById("vocabTable");
-
-vocabList.forEach((item, index) => {
-  const row = document.createElement("tr");
-  row.setAttribute("id", "row-" + index);
-
-  row.innerHTML = `
-    <td>${index + 1}</td>
+vocabList.forEach((item, idx) => {
+  const tr = document.createElement("tr");
+  tr.innerHTML = `
+    <td>${idx+1}</td>
     <td>${item.word}</td>
     <td class="ipa">${item.ipa}</td>
-    <td>${item.meaning}</td>
+    <td>${item.meaning}</td>  
     <td>${item.example}</td>
     <td><button onclick="speakOnce('${item.example}')">Play</button></td>
   `;
-
-  table.appendChild(row);
+  table.appendChild(tr);
 });
 
+// ======================= SPEAK =======================
 function getRate() {
   return parseFloat(document.getElementById("speedRate").value);
 }
 
-function getRepeat() {
-  return parseInt(document.getElementById("repeatCount").value);
-}
-
 function speakOnce(text) {
-  const speech = new SpeechSynthesisUtterance(text);
-  speech.lang = 'en-US';
-  speech.rate = getRate();
-  window.speechSynthesis.speak(speech);
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = "en-US";
+  u.rate = getRate();
+  speechSynthesis.cancel();
+  speechSynthesis.speak(u);
 }
 
-let isPlaying = false;
-let currentIndex = 0;
+// ======================= PRACTICE SETS (FIX CỐT LÕI) =======================
 
-async function playAll() {
-  stopAll();
-  isPlaying = true;
-  currentIndex = 0;
-
-  while (currentIndex < vocabList.length && isPlaying) {
-    highlightRow(currentIndex);
-
-    for (let i = 0; i < getRepeat(); i++) {
-      await speakWithPromise(vocabList[currentIndex].example);
-      await delay(3000);
-    }
-
-    await delay(3000);
-    currentIndex++;
+const practiceSets = [
+  {
+    question: "What do you do in the morning?",
+    answers: [0,1,2,3,4,5,6]
+  },
+  {
+    question: "What do you do during the day?",
+    answers: [7,8,9,10,11]
+  },
+  {
+    question: "What do you do after work?",
+    answers: [12,13,14,15]
+  },
+  {
+    question: "What do you do at night?",
+    answers: [16,17,18,19]
   }
+];
 
-  clearHighlight();
-}
+let currentPractice = null;
+let currentAnswerText = "";
 
-function highlightRow(index) {
-  clearHighlight();
-  const row = document.getElementById("row-" + index);
-  if (row) row.classList.add("highlight");
-}
-
-function clearHighlight() {
-  document.querySelectorAll("tr").forEach(r => r.classList.remove("highlight"));
-}
-
-function pauseAll() {
-  window.speechSynthesis.pause();
-}
-
-function resumeAll() {
-  window.speechSynthesis.resume();
-}
-
-function stopAll() {
-  isPlaying = false;
-  window.speechSynthesis.cancel();
-  clearHighlight();
-}
-
-function speakWithPromise(text) {
-  return new Promise(resolve => {
-    const speech = new SpeechSynthesisUtterance(text);
-    speech.lang = 'en-US';
-    speech.rate = getRate();
-    speech.onend = () => resolve();
-    window.speechSynthesis.speak(speech);
-  });
-}
-
-function delay(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-// Recording
-let mediaRecorder;
-let audioChunks = [];
-let stream;
-
-async function startRecording() {
-  try {
-    stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-
-    mediaRecorder = new MediaRecorder(stream);
-    audioChunks = [];
-
-    mediaRecorder.ondataavailable = event => {
-      if (event.data.size > 0) {
-        audioChunks.push(event.data);
-      }
-    };
-
-    mediaRecorder.onstop = () => {
-      const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-      const audioUrl = URL.createObjectURL(audioBlob);
-
-      const audio = document.createElement("audio");
-      audio.src = audioUrl;
-      audio.controls = true;
-
-      document.body.appendChild(audio);
-
-      stream.getTracks().forEach(track => track.stop());
-    };
-
-    mediaRecorder.start();
-  } catch (err) {
-    alert("Microphone error: " + err.message);
-  }
-}
-
-function stopRecording() {
-  if (mediaRecorder && mediaRecorder.state !== "inactive") {
-    mediaRecorder.stop();
-  } else {
-    alert("Recorder chưa start hoặc đã stop rồi!");
-  }
-}
-
-// Practice
-let practiceIndex = 0;
-
+// ======================= START PRACTICE =======================
 function startPractice() {
-  practiceIndex = Math.floor(Math.random() * vocabList.length);
-
   document.getElementById("answer").style.display = "none";
 
-  const questions = [
-    "What do you do in the morning?",
-    "What do you do during the day?",
-    "What do you do after work?",
-    "What do you do at night?"
+  // chọn practice set
+  currentPractice = practiceSets[
+    Math.floor(Math.random() * practiceSets.length)
   ];
 
-  const q = questions[Math.floor(Math.random() * questions.length)];
+  // chọn answer hợp lệ
+  const answerIndex =
+    currentPractice.answers[
+      Math.floor(Math.random() * currentPractice.answers.length)
+    ];
 
-  document.getElementById("question").innerText = q;
+  currentAnswerText = vocabList[answerIndex].example;
 
-  speakOnce(q);
+  document.getElementById("question").innerText = currentPractice.question;
+  document.getElementById("answer").innerText = currentAnswerText;
 
-  document.getElementById("answer").innerText = vocabList[practiceIndex].example;
+  speakOnce(currentPractice.question);
 }
 
+// ======================= SHOW ANSWER =======================
 function showAnswer() {
   const answer = document.getElementById("answer");
   answer.style.display = "block";
-  speakOnce(answer.innerText);
+  speakOnce(currentAnswerText);
 }
 </script>
 
