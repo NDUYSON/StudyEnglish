@@ -156,7 +156,10 @@ function clearHighlight(){
 function speakAsync(t){
  return new Promise(res=>{
   const u=new SpeechSynthesisUtterance(t);
-  u.lang="en-US"; u.onend=res; speechSynthesis.speak(u);
+  u.lang="en-US";
+  u.rate = rate(); // 🔥 THÊM DÒNG NÀY
+  u.onend = res;
+  speechSynthesis.speak(u);
  });
 }
 
@@ -181,7 +184,6 @@ function stopRecording(){
  if(mediaRecorder&&mediaRecorder.state!=="inactive")mediaRecorder.stop();
 }
 
-// ========== PRACTICE ==========
 // ========== PRACTICE ==========
 const practiceMap = {
   morning: {
