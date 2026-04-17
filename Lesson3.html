@@ -63,6 +63,14 @@ body {
   <button onclick="toggleAuto()">🤖 Auto: OFF</button>
 
   <br><br>
+
+  <!-- 🔥 SPEED SLIDER -->
+  Speed:
+  <input type="range" id="speedSlider" min="0.3" max="1.5" step="0.1" value="1">
+  <span id="speedValue">1.0</span>
+
+  
+
   Thinking:
   <select id="delayQ">
     <option value="3000">3s</option>
@@ -83,6 +91,7 @@ body {
 </div>
 
 <script>
+
 // ===== DATA =====
 const pairs = [
   { q:"What time do you wake up?", a:"I wake up at around 6 A.M." },
@@ -114,11 +123,26 @@ let autoTimer = null;
 let currentAnswer = "";
 let currentAnswerDiv = null;
 
-// ===== SPEAK (with onEnd callback) =====
+// ===== SPEED =====
+const speedSlider = document.getElementById("speedSlider");
+const speedValue = document.getElementById("speedValue");
+
+speedSlider.oninput = () => {
+  speedValue.innerText = speedSlider.value;
+};
+
+function getRate(){
+  return parseFloat(speedSlider.value);
+}
+
+// ===== SPEAK =====
 function speak(text, onEnd = null) {
   const u = new SpeechSynthesisUtterance(text);
   u.lang = "en-US";
+  u.rate = getRate(); // 🔥 áp dụng speed
+
   if (onEnd) u.onend = onEnd;
+
   speechSynthesis.cancel();
   speechSynthesis.speak(u);
 }
@@ -130,7 +154,7 @@ function start() {
   load();
 }
 
-// ===== LOAD QUESTION =====
+// ===== LOAD =====
 function load() {
   clearTimeout(autoTimer);
 
@@ -151,7 +175,6 @@ function load() {
   box.appendChild(qDiv);
   box.appendChild(aDiv);
 
-  // ✅ Auto starts ONLY after question finished speaking
   speak(item.q, () => {
     if (autoMode) runAuto();
   });
@@ -175,22 +198,19 @@ function startCountdown(ms, callback) {
   }, 1000);
 }
 
-// ===== AUTO FLOW =====
+// ===== AUTO =====
 function runAuto() {
   const delayQ = parseInt(document.getElementById("delayQ").value);
   const delayA = parseInt(document.getElementById("delayA").value);
 
-  // 🧠 Thinking after question
   startCountdown(delayQ, () => {
     showAnswerAuto(delayA);
   });
 }
 
-// ===== SHOW ANSWER AUTO =====
 function showAnswerAuto(delayA) {
   currentAnswerDiv.innerText = "YOU: " + currentAnswer;
 
-  // ✅ Delay AFTER answer finishes speaking
   speak(currentAnswer, () => {
     startCountdown(delayA, () => {
       next();
@@ -198,7 +218,7 @@ function showAnswerAuto(delayA) {
   });
 }
 
-// ===== SHOW ANSWER MANUAL =====
+// ===== MANUAL =====
 function showAnswer() {
   if (!currentAnswerDiv) return;
   currentAnswerDiv.innerText = "YOU: " + currentAnswer;
@@ -221,6 +241,7 @@ function toggleAuto() {
   const btn = document.querySelector("button[onclick='toggleAuto()']");
   btn.innerText = autoMode ? "🤖 Auto: ON" : "🤖 Auto: OFF";
 }
+
 </script>
 
 </body>
