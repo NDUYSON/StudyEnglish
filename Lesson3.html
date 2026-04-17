@@ -5,9 +5,15 @@
 <title>Lesson 3 - Role Play PRO</title>
 
 <style>
-body { font-family: Arial; background:#f5f6fa; padding:20px;}
-.container { max-width:800px; margin:auto; }
-
+body {
+  font-family: Arial, sans-serif;
+  background:#f5f6fa;
+  padding:20px;
+}
+.container {
+  max-width:800px;
+  margin:auto;
+}
 .card {
   background:white;
   border-radius:15px;
@@ -15,10 +21,15 @@ body { font-family: Arial; background:#f5f6fa; padding:20px;}
   margin-top:20px;
   box-shadow:0 5px 15px rgba(0,0,0,0.1);
 }
-
-.lineA { color:#0984e3; font-weight:bold; margin:10px 0; }
-.lineB { color:green; margin:10px 0; }
-
+.lineA {
+  color:#0984e3;
+  font-weight:bold;
+  margin:10px 0;
+}
+.lineB {
+  color:green;
+  margin:10px 0;
+}
 .controls button {
   margin:5px;
   padding:10px 15px;
@@ -28,19 +39,16 @@ body { font-family: Arial; background:#f5f6fa; padding:20px;}
   color:white;
   cursor:pointer;
 }
-
 .countdown {
   font-size:40px;
   color:red;
   font-weight:bold;
   margin-top:10px;
 }
-
 </style>
 </head>
 
 <body>
-
 <div class="container">
 
 <h2>🎭 Lesson 3: Role Play PRO</h2>
@@ -54,27 +62,28 @@ body { font-family: Arial; background:#f5f6fa; padding:20px;}
   <button onclick="showAnswer()">👁 Show</button>
   <button onclick="toggleAuto()">🤖 Auto: OFF</button>
 
+  <br><br>
   Thinking:
   <select id="delayQ">
+    <option value="3000">3s</option>
+    <option value="4000">4s</option>
     <option value="5000">5s</option>
-	<option value="6000">6s</option>
-    <option value="7000">7s</option>
+    <option value="6000">6s</option>
   </select>
 
   After Answer:
   <select id="delayA">
+    <option value="3000">3s</option>
+    <option value="4000">4s</option>
     <option value="5000">5s</option>
     <option value="6000">6s</option>
-    <option value="7000">7s</option>
   </select>
 </div>
 
 </div>
 
 <script>
-
-
-// ===== DATA (pair A-B) =====
+// ===== DATA =====
 const pairs = [
   { q:"What time do you wake up?", a:"I wake up at around 6 A.M." },
   { q:"What do you do in the morning?", a:"I brush my teeth, wash my face and then have breakfast with my children at around 7:15 A.M." },
@@ -82,36 +91,34 @@ const pairs = [
   { q:"What time do you go to work?", a:"I go to work at around 8 A.M." },
   { q:"What do you do after work?", a:"I go home, take a shower and then have dinner with my family at around 7:00 P.M." },
   { q:"What do you do at night?", a:"I watch TV, relax and go to bed at around 11 P.M." },
-
   { q:"Do you take a shower in the morning?", a:"No, I don't. I always take a shower before dinner every night." },
-  { q:"What do you eat for breakfast?", a:"I eat bread and eggs." },
-  { q:"Do you check your phone in the morning?", a:"Yes, I check my phone." },
+  { q:"What do you eat for breakfast?", a:"I usually eat rice with soup, but sometimes I eat bread and eggs." },
+  { q:"Do you check your phone in the morning?", a:"Yes, I check my phone every morning." },
   { q:"How do you go to work?", a:"I go to work by car." },
   { q:"Do you like your job?", a:"Yes, I like my job." },
   { q:"What do you do at work?", a:"I work on a computer." },
   { q:"Do you have lunch at work?", a:"Yes, I have lunch at work." },
-  { q:"What time do you have lunch?", a:"I have lunch at 12 p.m." },
-  { q:"Do you take a break in the afternoon?", a:"Yes, I take a break." },
-  { q:"What time do you finish work?", a:"I finish work at 5 p.m." },
-  { q:"Do you feel tired after work?", a:"Yes, I feel tired." },
-  { q:"What do you do in the evening?", a:"I cook dinner and relax." },
-  { q:"Do you read books at night?", a:"Yes, I read books sometimes." },
-  { q:"What time do you go to bed?", a:"I go to bed at 10 p.m." }
+  { q:"What time do you have lunch?", a:"I usually have lunch at 12 p.m." },
+  { q:"Do you take a break in the afternoon?", a:"Yes, I do. I take a break around 3 p.m. every day." },
+  { q:"What time do you finish work?", a:"I finish work at 5:30 p.m." },
+  { q:"Do you feel tired after work?", a:"Yes, sometimes I feel tired." },
+  { q:"What do you do in the evening?", a:"I watch TV, cook dinner and relax." },
+  { q:"Do you read books at night?", a:"Yes, sometimes I read." },
+  { q:"What time do you go to bed?", a:"I go to bed at around 11 p.m." }
 ];
-
 
 // ===== GLOBAL =====
 let current = 0;
 let autoMode = false;
 let autoTimer = null;
-
 let currentAnswer = "";
 let currentAnswerDiv = null;
 
-// ===== SPEAK =====
-function speak(text) {
+// ===== SPEAK (with onEnd callback) =====
+function speak(text, onEnd = null) {
   const u = new SpeechSynthesisUtterance(text);
   u.lang = "en-US";
+  if (onEnd) u.onend = onEnd;
   speechSynthesis.cancel();
   speechSynthesis.speak(u);
 }
@@ -123,12 +130,11 @@ function start() {
   load();
 }
 
-// ===== LOAD =====
+// ===== LOAD QUESTION =====
 function load() {
   clearTimeout(autoTimer);
 
   const item = pairs[current];
-
   currentAnswer = item.a;
 
   const qDiv = document.createElement("div");
@@ -145,16 +151,16 @@ function load() {
   box.appendChild(qDiv);
   box.appendChild(aDiv);
 
-  speak(item.q);
-
-  if (autoMode) runAuto();
+  // ✅ Auto starts ONLY after question finished speaking
+  speak(item.q, () => {
+    if (autoMode) runAuto();
+  });
 }
 
 // ===== COUNTDOWN =====
 function startCountdown(ms, callback) {
   let time = ms / 1000;
   const el = document.getElementById("countdown");
-
   el.innerText = time;
 
   const interval = setInterval(() => {
@@ -169,29 +175,32 @@ function startCountdown(ms, callback) {
   }, 1000);
 }
 
-// ===== AUTO =====
+// ===== AUTO FLOW =====
 function runAuto() {
   const delayQ = parseInt(document.getElementById("delayQ").value);
   const delayA = parseInt(document.getElementById("delayA").value);
 
-  // ⏱ thinking
+  // 🧠 Thinking after question
   startCountdown(delayQ, () => {
-
-    // show answer
-    showAnswer();
-
-    // ⏱ after answer
-    startCountdown(delayA, () => {
-      next();
-    });
-
+    showAnswerAuto(delayA);
   });
 }
 
-// ===== SHOW =====
+// ===== SHOW ANSWER AUTO =====
+function showAnswerAuto(delayA) {
+  currentAnswerDiv.innerText = "YOU: " + currentAnswer;
+
+  // ✅ Delay AFTER answer finishes speaking
+  speak(currentAnswer, () => {
+    startCountdown(delayA, () => {
+      next();
+    });
+  });
+}
+
+// ===== SHOW ANSWER MANUAL =====
 function showAnswer() {
   if (!currentAnswerDiv) return;
-
   currentAnswerDiv.innerText = "YOU: " + currentAnswer;
   speak(currentAnswer);
 }
@@ -199,12 +208,10 @@ function showAnswer() {
 // ===== NEXT =====
 function next() {
   current++;
-
   if (current >= pairs.length) {
-    alert("Done!");
+    alert("✅ Lesson Completed!");
     return;
   }
-
   load();
 }
 
@@ -214,7 +221,6 @@ function toggleAuto() {
   const btn = document.querySelector("button[onclick='toggleAuto()']");
   btn.innerText = autoMode ? "🤖 Auto: ON" : "🤖 Auto: OFF";
 }
-
 </script>
 
 </body>
