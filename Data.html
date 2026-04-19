@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+
+
+<script>
+
+// ===== DATA =====
+const vocabList = [
+  {word:"wake up", ipa:"/weɪk ʌp/", meaning:"thức dậy", example:"I wake up at 6 a.m."},
+  {word:"get up", ipa:"/ɡet ʌp/", meaning:"ra khỏi giường", example:"I usually get up quickly every morning."},
+  {word:"brush my teeth", ipa:"/brʌʃ maɪ tiːθ/", meaning:"đánh răng", example:"I brush my teeth after waking up every day."},
+  {word:"wash my face", ipa:"/wɑːʃ maɪ feɪs/", meaning:"rửa mặt", example:"I wash my face after waking up."},
+  {word:"take a shower", ipa:"/teɪk ə ˈʃaʊər/", meaning:"tắm", example:"I take a shower after work everyday."},
+  {word:"have breakfast", ipa:"/hæv ˈbrekfəst/", meaning:"ăn sáng", example:"I have breakfast at around 7 A.M every morning."},
+  {word:"drink coffee", ipa:"/drɪŋk ˈkɔːfi/", meaning:"uống cà phê", example:"I drink coffee every morning."},
+  {word:"go to work", ipa:"/ɡoʊ tuː wɜːrk/", meaning:"đi làm", example:"I go to work at around 8 A.M by car."},
+  {word:"start work", ipa:"/stɑːrt wɜːrk/", meaning:"bắt đầu làm việc", example:"I start work at 8:30 A.M."},
+  {word:"check emails", ipa:"/tʃek ˈiːmeɪlz/", meaning:"kiểm tra email", example:"I check emails in the morning."},
+  {word:"have lunch", ipa:"/hæv lʌntʃ/", meaning:"ăn trưa", example:"I have lunch at noon in company."},
+  {word:"take a break", ipa:"/teɪk ə breɪk/", meaning:"nghỉ giải lao", example:"I take a break at around 3 P.M."},
+  {word:"finish work", ipa:"/ˈfɪnɪʃ wɜːrk/", meaning:"tan làm", example:"I finish work at 5:30 P.M."},
+  {word:"go home", ipa:"/ɡoʊ hoʊm/", meaning:"về nhà", example:"I always go home after work."},
+  {word:"cook dinner", ipa:"/kʊk ˈdɪnər/", meaning:"nấu ăn tối", example:"I cook dinner in the evening."},
+  {word:"have dinner", ipa:"/hæv ˈdɪnər/", meaning:"ăn tối", example:"I have dinner at around 7 P.M."},
+  {word:"watch TV", ipa:"/wɑːtʃ ˌtiːˈviː/", meaning:"xem TV", example:"I watch TV after dinner."},
+  {word:"use my phone", ipa:"/juːz maɪ foʊn/", meaning:"dùng điện thoại", example:"I use my phone before bed."},
+  {word:"read a book", ipa:"/riːd ə bʊk/", meaning:"đọc sách", example:"I read a book at night."},
+  {word:"go to bed", ipa:"/ɡoʊ tuː bed/", meaning:"đi ngủ", example:"I go to bed at around 11 P.M."},
+  {word:"make the bed", ipa:"/meɪk ðə bed/", meaning:"dọn giường", example:"I make the bed every morning."},
+	{word:"get dressed", ipa:"/ɡet drest/", meaning:"mặc quần áo", example:"I get dressed before breakfast."},
+	{word:"leave the house", ipa:"/liːv ðə haʊs/", meaning:"rời khỏi nhà", example:"I leave the house at 7:30 A.M."},
+	{word:"catch the bus", ipa:"/kætʃ ðə bʌs/", meaning:"bắt xe buýt", example:"I catch the bus to work."},
+	{word:"drive to work", ipa:"/draɪv tuː wɜːrk/", meaning:"lái xe đi làm", example:"I drive to work every day."},
+	{word:"arrive at work", ipa:"/əˈraɪv æt wɜːrk/", meaning:"đến chỗ làm", example:"I arrive at work at 8 A.M."},
+	{word:"turn on the computer", ipa:"/tɜːrn ɒn ðə kəmˈpjuːtər/", meaning:"bật máy tính", example:"I turn on the computer when I start work."},
+	{word:"attend a meeting", ipa:"/əˈtend ə ˈmiːtɪŋ/", meaning:"tham gia cuộc họp", example:"I attend a meeting every Monday."},
+	{word:"write a report", ipa:"/raɪt ə rɪˈpɔːrt/", meaning:"viết báo cáo", example:"I write a report every week."},
+	{word:"talk to colleagues", ipa:"/tɔːk tuː ˈkɒliːɡz/", meaning:"nói chuyện với đồng nghiệp", example:"I talk to colleagues during breaks."},
+	{word:"answer calls", ipa:"/ˈænsər kɔːlz/", meaning:"trả lời điện thoại", example:"I answer calls in the office."},
+	{word:"send emails", ipa:"/send ˈiːmeɪlz/", meaning:"gửi email", example:"I send emails every day."},
+	{word:"have a meeting", ipa:"/hæv ə ˈmiːtɪŋ/", meaning:"họp", example:"I have a meeting in the afternoon."},
+	{word:"take notes", ipa:"/teɪk noʊts/", meaning:"ghi chú", example:"I take notes during meetings."},
+	{word:"eat snacks", ipa:"/iːt snæks/", meaning:"ăn vặt", example:"I eat snacks in the afternoon."},
+	{word:"go shopping", ipa:"/ɡoʊ ˈʃɑːpɪŋ/", meaning:"đi mua sắm", example:"I go shopping on weekends."},
+	{word:"buy groceries", ipa:"/baɪ ˈɡroʊsəriz/", meaning:"mua thực phẩm", example:"I buy groceries after work."},
+	{word:"clean the house", ipa:"/kliːn ðə haʊs/", meaning:"dọn dẹp nhà cửa", example:"I clean the house on Sunday."},
+	{word:"do the laundry", ipa:"/duː ðə ˈlɔːndri/", meaning:"giặt đồ", example:"I do the laundry every weekend."},
+	{word:"wash the dishes", ipa:"/wɑːʃ ðə ˈdɪʃɪz/", meaning:"rửa bát", example:"I wash the dishes after dinner."},
+	{word:"take out the trash", ipa:"/teɪk aʊt ðə træʃ/", meaning:"đổ rác", example:"I take out the trash every evening."},
+	{word:"exercise", ipa:"/ˈeksərsaɪz/", meaning:"tập thể dục", example:"I exercise three times a week."},
+	{word:"go for a walk", ipa:"/ɡoʊ fɔːr ə wɔːk/", meaning:"đi dạo", example:"I go for a walk after dinner."},
+	{word:"listen to music", ipa:"/ˈlɪsn tuː ˈmjuːzɪk/", meaning:"nghe nhạc", example:"I listen to music before bed."},
+	{word:"play games", ipa:"/pleɪ ɡeɪmz/", meaning:"chơi game", example:"I play games on my phone."},
+	{word:"study English", ipa:"/ˈstʌdi ˈɪŋɡlɪʃ/", meaning:"học tiếng Anh", example:"I study English every day."},
+	{word:"review lessons", ipa:"/rɪˈvjuː ˈlesənz/", meaning:"ôn bài", example:"I review lessons at night."},
+	{word:"plan the day", ipa:"/plæn ðə deɪ/", meaning:"lên kế hoạch trong ngày", example:"I plan the day in the morning."},
+	{word:"set an alarm", ipa:"/set ən əˈlɑːrm/", meaning:"đặt báo thức", example:"I set an alarm before going to bed."},
+	{word:"fall asleep", ipa:"/fɔːl əˈsliːp/", meaning:"ngủ thiếp đi", example:"I fall asleep quickly at night."}
+];
+
+</html>
