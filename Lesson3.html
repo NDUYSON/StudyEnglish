@@ -255,10 +255,10 @@ function showAnswer(){
 // ===== NEXT =====
 function next(){
   current++;
-//  if(current > endIdx){
-//    alert("Done");
-//    return;
-//  }
+  if(current > endIdx){
+    alert("Lesson Completed!!!");
+    return;
+  }
   load();
 }
 
