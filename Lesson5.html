@@ -79,6 +79,20 @@ const sentences = [
 
 ];
 
+let usVoice = null;
+
+function loadVoices(){
+  const voices = speechSynthesis.getVoices();
+
+  // tìm giọng US
+  usVoice = voices.find(v => v.lang === "en-US") 
+           || voices.find(v => v.lang.includes("en"));
+
+  console.log("US Voice:", usVoice);
+}
+
+speechSynthesis.onvoiceschanged = loadVoices;
+
 // ===== RENDER =====
 const container = document.getElementById("container");
 let allLines = [];
@@ -108,12 +122,16 @@ function speakAsync(text){
     u.rate = rate();
     u.pitch = 1;
 
+    // ✅ QUAN TRỌNG: ép dùng giọng US
+    if(usVoice){
+      u.voice = usVoice;
+    }
+
     u.onend = ()=> setTimeout(resolve, 800);
 
-    synth.speak(u);
+    speechSynthesis.speak(u);
   });
 }
-
 // ===== CONTROL =====
 let index = 0;
 let isPlaying = false;
