@@ -61,6 +61,24 @@ const speedVal = document.getElementById("speedVal");
 speedSlider.oninput = ()=> speedVal.innerText = speedSlider.value;
 function rate(){ return parseFloat(speedSlider.value); }
 
+// ===== 🔥 VOICE FIX (QUAN TRỌNG) =====
+let usVoice = null;
+
+function loadVoices(){
+  const voices = speechSynthesis.getVoices();
+
+  // Ưu tiên giọng Google US nếu có
+  usVoice = voices.find(v => v.name.includes("Google US English"))
+          || voices.find(v => v.lang === "en-US")
+          || voices.find(v => v.lang.includes("en"));
+
+  console.log("Selected voice:", usVoice);
+}
+
+// load voice
+speechSynthesis.onvoiceschanged = loadVoices;
+
+
 // ===== DATA =====
 const dialogs = [
 
@@ -169,6 +187,7 @@ function speakAsync(text, speaker){
   return new Promise(resolve=>{
     const u = new SpeechSynthesisUtterance(text);
 
+    // phân biệt giọng A/B
     if(speaker === "A"){
       u.pitch = 1.2;
     }else{
@@ -177,6 +196,11 @@ function speakAsync(text, speaker){
 
     u.lang = "en-US";
     u.rate = rate();
+
+    // ✅ ÉP GIỌNG US
+    if(usVoice){
+      u.voice = usVoice;
+    }
 
     u.onend = ()=> setTimeout(resolve, 500);
 
