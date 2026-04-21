@@ -2,15 +2,12 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Work Conversation Practice</title>
+<title>Daily Appointment Dialog Practice</title>
 
 <style>
 body { font-family: Arial; padding:20px; }
-
 h2 { text-align:center }
-
 .controls { margin-bottom:15px }
-
 button { padding:8px 12px; margin-right:5px }
 
 .dialog {
@@ -20,25 +17,20 @@ button { padding:8px 12px; margin-right:5px }
   background:#f5f6fa;
 }
 
-.line {
-  padding:6px;
-  border-radius:6px;
-}
-
+.line { padding:6px; border-radius:6px; }
 .A { color:#0984e3; }
 .B { color:#d63031; }
 
 .active {
   background:#ffeaa7;
   transform:scale(1.02);
-  transition:0.2s;
 }
 </style>
 </head>
 
 <body>
 
-<h2>🏢 Work Conversation (Shadowing)</h2>
+<h2>🗣️ Daily Appointment Dialog</h2>
 
 <div class="controls">
   <button onclick="play()">▶ Play</button>
@@ -61,219 +53,138 @@ const speedVal = document.getElementById("speedVal");
 speedSlider.oninput = ()=> speedVal.innerText = speedSlider.value;
 function rate(){ return parseFloat(speedSlider.value); }
 
-// ===== 🔥 VOICE FIX (QUAN TRỌNG) =====
-let usVoice = null;
+// ===== VOICE PRO =====
+let usVoice=null, voicesLoaded=false;
 
 function loadVoices(){
-  const voices = speechSynthesis.getVoices();
+  let v = speechSynthesis.getVoices();
+  if(!v.length) return;
 
-  // Ưu tiên giọng Google US nếu có
-  usVoice = voices.find(v => v.name.includes("Google US English"))
-          || voices.find(v => v.lang === "en-US")
-          || voices.find(v => v.lang.includes("en"));
+  usVoice = v.find(x=>x.name.includes("Samantha")) ||
+            v.find(x=>x.lang==="en-US") ||
+            v.find(x=>x.lang.includes("en"));
 
-  console.log("Selected voice:", usVoice);
+  voicesLoaded=true;
 }
-
-// load voice
-speechSynthesis.onvoiceschanged = loadVoices;
-
+speechSynthesis.onvoiceschanged=loadVoices;
+setTimeout(loadVoices,300);
 
 // ===== DATA =====
 const dialogs = [
 
 [
-["A","Can we have a quick meeting?"],
-["B","Sure, what is it about?"],
-["A","Project updates."],
-["B","Let’s do it now."]
+["A","Hey, do you have a minute to talk about the new project?"],
+["B","Sure, what’s up?"],
+["A","We might need to adjust the timeline."],
+["B","Is there any specific reason?"],
+["A","Yeah, the client requested some additional features."],
+["B","I see. Let’s review the schedule together later."],
+["A","Sounds good. I’ll prepare the updated plan."]
 ],
 
 [
-["A","Did you finish the report?"],
-["B","Not yet."],
-["A","When can you complete it?"],
-["B","By this afternoon."]
+["A","Have you finished the report for the meeting?"],
+["B","I’m almost done. Just polishing the last section."],
+["A","Great. Can you send it to me before noon?"],
+["B","Sure, I’ll send it within the next hour."],
+["A","Perfect, I’ll review it before the meeting."],
+["B","Thanks, let me know if anything needs to be changed."]
 ],
 
 [
-["A","Could you help me with this task?"],
-["B","Of course."],
-["A","I appreciate it."],
-["B","No problem."]
+["A","I think we need to improve this workflow."],
+["B","I agree. It’s taking too much time right now."],
+["A","Do you have any suggestions?"],
+["B","Maybe we can automate part of the process."],
+["A","That’s a good idea."],
+["B","Let’s bring this up in the next team meeting."],
+["A","Alright, I’ll add it to the agenda."]
 ],
 
 [
-["A","Let’s schedule a meeting."],
-["B","When are you available?"],
-["A","Tomorrow morning."],
-["B","That works."]
+["A","Can you help me with this issue? I’m stuck."],
+["B","Sure, what seems to be the problem?"],
+["A","I can’t get the system to respond properly."],
+["B","Did you check the latest update?"],
+["A","Not yet."],
+["B","Try that first. It might solve the issue."],
+["A","Okay, I’ll give it a try. Thanks."]
 ],
 
 [
-["A","I have a question about the design."],
-["B","Go ahead."],
-["A","Is this version final?"],
-["B","Not yet."]
-],
-
-[
-["A","Can you send me the file?"],
-["B","Sure, I’ll send it now."],
-["A","Thanks."],
-["B","You’re welcome."]
-],
-
-[
-["A","The deadline is tomorrow."],
-["B","I know."],
-["A","Are you ready?"],
-["B","Almost done."]
-],
-
-[
-["A","Let’s take a break."],
-["B","Good idea."],
-["A","Coffee?"],
-["B","Yes, please."]
-],
-
-[
-["A","We need to improve this process."],
-["B","I agree."],
-["A","Any suggestions?"],
-["B","Let’s discuss later."]
-],
-
-[
-["A","Can you join the meeting?"],
-["B","I’m in another call."],
-["A","No problem."],
-["B","I’ll join later."]
+["A","Are you available for a meeting tomorrow morning?"],
+["B","Let me check my schedule."],
+["A","We need to discuss the client feedback."],
+["B","I’m free at 10 a.m."],
+["A","Perfect, I’ll set up the meeting."],
+["B","Sounds good. See you then."]
 ]
 
 ];
 
 // ===== RENDER =====
-const container = document.getElementById("container");
-let allLines = [];
+const container=document.getElementById("container");
+let allLines=[];
 
-dialogs.forEach((dialog, dIndex)=>{
-  const div = document.createElement("div");
-  div.className = "dialog";
+dialogs.forEach((d,di)=>{
+  let box=document.createElement("div");
+  box.className="dialog";
 
-  dialog.forEach((line, lIndex)=>{
-    const p = document.createElement("div");
-    p.className = "line " + line[0];
-    p.id = `d${dIndex}_l${lIndex}`;
-    p.innerText = `${line[0]}: ${line[1]}`;
+  d.forEach((l,li)=>{
+    let el=document.createElement("div");
+    el.className="line "+l[0];
+    el.id=`d${di}_${li}`;
+    el.innerText=l[0]+": "+l[1];
+    box.appendChild(el);
 
-    div.appendChild(p);
-
-    allLines.push({
-      id: p.id,
-      speaker: line[0],
-      text: line[1]
-    });
+    allLines.push({id:el.id,text:l[1],speaker:l[0]});
   });
 
-  container.appendChild(div);
+  container.appendChild(box);
 });
 
-// ===== SPEECH =====
-const synth = window.speechSynthesis;
-
-function speakAsync(text, speaker){
-  return new Promise(resolve=>{
-    const u = new SpeechSynthesisUtterance(text);
-
-    // phân biệt giọng A/B
-    if(speaker === "A"){
-      u.pitch = 1.2;
-    }else{
-      u.pitch = 0.8;
-    }
-
-    u.lang = "en-US";
-    u.rate = rate();
-
-    // ✅ ÉP GIỌNG US
-    if(usVoice){
-      u.voice = usVoice;
-    }
-
-    u.onend = ()=> setTimeout(resolve, 500);
-
-    synth.speak(u);
+// ===== SPEAK =====
+function speakAsync(text,speaker){
+  return new Promise(res=>{
+    let u=new SpeechSynthesisUtterance(text);
+    u.lang="en-US";
+    u.rate=rate();
+    u.pitch=speaker==="A"?1.2:0.8;
+    if(usVoice) u.voice=usVoice;
+    u.onend=()=>setTimeout(res,400);
+    speechSynthesis.speak(u);
   });
 }
 
 // ===== CONTROL =====
-let index = 0;
-let isPlaying = false;
-let isPaused = false;
+let i=0,playing=false,paused=false;
 
 async function play(){
-  stop();
-  isPlaying = true;
-  index = 0;
-
-  while(index < allLines.length && isPlaying){
-
-    while(isPaused){
-      await new Promise(r=>setTimeout(r,200));
-    }
-
-    highlight(index);
-
-    let line = allLines[index];
-    await speakAsync(line.text, line.speaker);
-
-    index++;
+  stop(); playing=true; i=0;
+  while(i<allLines.length && playing){
+    while(paused) await new Promise(r=>setTimeout(r,200));
+    highlight(i);
+    await speakAsync(allLines[i].text,allLines[i].speaker);
+    i++;
   }
-
-  clearHighlight();
+  clear();
 }
 
-function pause(){
-  isPaused = true;
-  synth.pause();
-}
-
-function resume(){
-  isPaused = false;
-  synth.resume();
-}
-
-function stop(){
-  isPlaying = false;
-  isPaused = false;
-  synth.cancel();
-  clearHighlight();
-}
+function pause(){ paused=true; speechSynthesis.pause(); }
+function resume(){ paused=false; speechSynthesis.resume(); }
+function stop(){ playing=false; paused=false; speechSynthesis.cancel(); clear(); }
 
 // ===== UI =====
 function highlight(i){
-  clearHighlight();
-
-  const el = document.getElementById(allLines[i].id);
-  if(!el) return;
-
+  clear();
+  let el=document.getElementById(allLines[i].id);
   el.classList.add("active");
-
-  el.scrollIntoView({
-    behavior:"smooth",
-    block:"center"
-  });
+  el.scrollIntoView({behavior:"smooth",block:"center"});
 }
-
-function clearHighlight(){
-  document.querySelectorAll(".line").forEach(el=>{
-    el.classList.remove("active");
-  });
+function clear(){
+  document.querySelectorAll(".line").forEach(x=>x.classList.remove("active"));
 }
 
 </script>
-
 </body>
 </html>
