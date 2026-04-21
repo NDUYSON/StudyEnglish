@@ -33,7 +33,6 @@ button { padding:8px 12px; margin-right:5px }
   transform:scale(1.02);
   transition:0.2s;
 }
-
 </style>
 </head>
 
@@ -63,6 +62,22 @@ const speedVal = document.getElementById("speedVal");
 speedSlider.oninput = ()=> speedVal.innerText = speedSlider.value;
 
 function rate(){ return parseFloat(speedSlider.value); }
+
+// ===== 🔥 VOICE FIX =====
+let usVoice = null;
+
+function loadVoices(){
+  const voices = speechSynthesis.getVoices();
+
+  usVoice = voices.find(v => v.name.includes("Google US English"))
+          || voices.find(v => v.lang === "en-US")
+          || voices.find(v => v.lang.includes("en"));
+
+  console.log("US Voice:", usVoice);
+}
+
+speechSynthesis.onvoiceschanged = loadVoices;
+
 
 // ===== DIALOG DATA =====
 const dialogs = [
@@ -173,16 +188,16 @@ function speakAsync(text, speaker){
   return new Promise(resolve=>{
     const u = new SpeechSynthesisUtterance(text);
 
-    // 🎯 2 giọng khác nhau
-    if(speaker === "A"){
-      u.lang = "en-US";
-      u.pitch = 1.5;
-    }else{
-      u.lang = "en-US";
-      u.pitch = 1.2;
-    }
-
+    u.lang = "en-US";
     u.rate = rate();
+
+    // phân biệt giọng A/B
+    u.pitch = speaker === "A" ? 1.2 : 0.8;
+
+    // ✅ ép giọng US
+    if(usVoice){
+      u.voice = usVoice;
+    }
 
     u.onend = ()=> setTimeout(resolve, 800);
 
@@ -243,7 +258,6 @@ function highlight(i){
 
   el.classList.add("active");
 
-  // ✅ auto scroll center
   el.scrollIntoView({
     behavior:"smooth",
     block:"center"
