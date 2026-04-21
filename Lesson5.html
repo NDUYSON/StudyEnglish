@@ -14,11 +14,14 @@ h2 { text-align:center }
 button { padding:8px 12px; margin-right:5px }
 
 .line {
-  padding:10px;
-  margin-bottom:8px;
+  padding:12px;
+  margin-bottom:10px;
   border-radius:8px;
   background:#f5f6fa;
 }
+
+.en { font-weight:bold; }
+.vi { color:#636e72; font-size:14px; margin-top:4px; }
 
 .active {
   background:#ffeaa7;
@@ -30,7 +33,7 @@ button { padding:8px 12px; margin-right:5px }
 
 <body>
 
-<h2>📊 Presentation English (Shadowing)</h2>
+<h2>📊 Presentation English (Shadowing PRO)</h2>
 
 <div class="controls">
   <button onclick="play()">▶ Play</button>
@@ -53,85 +56,104 @@ const speedVal = document.getElementById("speedVal");
 speedSlider.oninput = ()=> speedVal.innerText = speedSlider.value;
 function rate(){ return parseFloat(speedSlider.value); }
 
-// ===== DATA =====
+// ===== DATA (20 câu PRO) =====
 const sentences = [
 
-"Good morning everyone.",
-"Thank you for joining today.",
-"Today, I would like to talk about our project.",
-"Let me start with an overview.",
-"First, I will explain the background.",
-"Next, I will show the main results.",
-"Please take a look at this slide.",
-"As you can see here, the data shows growth.",
-"This graph represents our performance.",
-"Now, let’s move to the next point.",
-"In conclusion, our project was successful.",
-"Thank you for your attention.",
-"Do you have any questions?",
-"I will answer your questions now.",
-"Let me clarify that point.",
-"I would like to emphasize this part.",
-"This is an important factor.",
-"Based on this data, we can conclude that...",
-"Let’s summarize the key points.",
-"Finally, thank you very much."
+["Good morning everyone.","Chào buổi sáng mọi người."],
+["Thank you for joining today.","Cảm ơn mọi người đã tham gia hôm nay."],
+["Today, I would like to present our project.","Hôm nay tôi xin trình bày về dự án của chúng tôi."],
+["Let me start with a brief overview.","Tôi xin bắt đầu với phần tổng quan ngắn."],
+["First, I will explain the background.","Đầu tiên, tôi sẽ giải thích bối cảnh."],
+["Next, I will go through the main points.","Tiếp theo, tôi sẽ trình bày các điểm chính."],
+["Please take a look at this slide.","Mọi người hãy nhìn vào slide này."],
+["As you can see, the data shows a clear trend.","Như bạn thấy, dữ liệu cho thấy xu hướng rõ ràng."],
+["This graph represents our performance.","Biểu đồ này thể hiện hiệu suất của chúng tôi."],
+["Let me move on to the next topic.","Tôi xin chuyển sang nội dung tiếp theo."],
+["I would like to highlight this key point.","Tôi muốn nhấn mạnh điểm quan trọng này."],
+["This is one of the most important factors.","Đây là một trong những yếu tố quan trọng nhất."],
+["Based on this data, we can conclude that...","Dựa trên dữ liệu này, chúng ta có thể kết luận rằng..."],
+["Now, let’s look at the results.","Bây giờ hãy xem kết quả."],
+["In conclusion, our project achieved its goals.","Tóm lại, dự án của chúng tôi đã đạt được mục tiêu."],
+["Thank you for your attention.","Cảm ơn mọi người đã chú ý lắng nghe."],
+["If you have any questions, feel free to ask.","Nếu có câu hỏi, xin cứ thoải mái hỏi."],
+["I will now answer your questions.","Bây giờ tôi sẽ trả lời câu hỏi."],
+["Let me clarify that point.","Tôi xin làm rõ điểm đó."],
+["Finally, thank you very much.","Cuối cùng, xin cảm ơn rất nhiều."]
 
 ];
 
+// ===== VOICE PRO (fix iPhone) =====
 let usVoice = null;
+let voicesLoaded = false;
 
 function loadVoices(){
   const voices = speechSynthesis.getVoices();
+  if(!voices.length) return;
 
-  // tìm giọng US
-  usVoice = voices.find(v => v.lang === "en-US") 
-           || voices.find(v => v.lang.includes("en"));
+  usVoice =
+    voices.find(v => v.name.includes("Google US English")) ||
+    voices.find(v => v.name.includes("Samantha")) ||
+    voices.find(v => v.lang === "en-US") ||
+    voices.find(v => v.lang.includes("en"));
 
-  console.log("US Voice:", usVoice);
+  voicesLoaded = true;
+
+  console.log("Voice:", usVoice?.name);
 }
 
 speechSynthesis.onvoiceschanged = loadVoices;
+setTimeout(loadVoices, 300);
+setTimeout(loadVoices, 1000);
 
 // ===== RENDER =====
 const container = document.getElementById("container");
 let allLines = [];
 
-sentences.forEach((text, i)=>{
+sentences.forEach((s, i)=>{
   const div = document.createElement("div");
   div.className = "line";
   div.id = "line-" + i;
-  div.innerText = text;
+
+  div.innerHTML = `
+    <div class="en">${s[0]}</div>
+    <div class="vi">${s[1]}</div>
+  `;
 
   container.appendChild(div);
 
   allLines.push({
     id: div.id,
-    text: text
+    text: s[0]
   });
 });
 
-// ===== SPEECH =====
-const synth = window.speechSynthesis;
-
+// ===== SPEAK =====
 function speakAsync(text){
   return new Promise(resolve=>{
-    const u = new SpeechSynthesisUtterance(text);
 
-    u.lang = "en-US";
-    u.rate = rate();
-    u.pitch = 1;
+    const speakNow = ()=>{
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = "en-US";
+      u.rate = rate();
 
-    // ✅ QUAN TRỌNG: ép dùng giọng US
-    if(usVoice){
-      u.voice = usVoice;
+      if(usVoice){
+        u.voice = usVoice;
+      }
+
+      u.onend = ()=> setTimeout(resolve, 400);
+
+      speechSynthesis.speak(u);
+    };
+
+    if(!voicesLoaded){
+      setTimeout(speakNow, 300);
+    } else {
+      speakNow();
     }
 
-    u.onend = ()=> setTimeout(resolve, 800);
-
-    speechSynthesis.speak(u);
   });
 }
+
 // ===== CONTROL =====
 let index = 0;
 let isPlaying = false;
@@ -160,18 +182,18 @@ async function play(){
 
 function pause(){
   isPaused = true;
-  synth.pause();
+  speechSynthesis.pause();
 }
 
 function resume(){
   isPaused = false;
-  synth.resume();
+  speechSynthesis.resume();
 }
 
 function stop(){
   isPlaying = false;
   isPaused = false;
-  synth.cancel();
+  speechSynthesis.cancel();
   clearHighlight();
 }
 
