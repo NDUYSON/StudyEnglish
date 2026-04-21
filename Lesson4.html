@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Work Conversation Practice</title>
+
+<style>
+body { font-family: Arial; padding:20px; }
+
+h2 { text-align:center }
+
+.controls { margin-bottom:15px }
+
+button { padding:8px 12px; margin-right:5px }
+
+.dialog {
+  margin-bottom:20px;
+  padding:10px;
+  border-radius:10px;
+  background:#f5f6fa;
+}
+
+.line {
+  padding:6px;
+  border-radius:6px;
+}
+
+.A { color:#0984e3; }
+.B { color:#d63031; }
+
+.active {
+  background:#ffeaa7;
+  transform:scale(1.02);
+  transition:0.2s;
+}
+</style>
+</head>
+
+<body>
+
+<h2>🏢 Work Conversation (Shadowing)</h2>
+
+<div class="controls">
+  <button onclick="play()">▶ Play</button>
+  <button onclick="pause()">⏸ Pause</button>
+  <button onclick="resume()">▶ Resume</button>
+  <button onclick="stop()">⏹ Stop</button>
+
+  Speed:
+  <input type="range" id="speed" min="0.5" max="1.2" step="0.1" value="0.7">
+  <span id="speedVal">0.7</span>
+</div>
+
+<div id="container"></div>
+
+<script>
+
+// ===== SPEED =====
+const speedSlider = document.getElementById("speed");
+const speedVal = document.getElementById("speedVal");
+speedSlider.oninput = ()=> speedVal.innerText = speedSlider.value;
+function rate(){ return parseFloat(speedSlider.value); }
+
+// ===== DATA =====
+const dialogs = [
+
+[
+["A","Can we have a quick meeting?"],
+["B","Sure, what is it about?"],
+["A","Project updates."],
+["B","Let’s do it now."]
+],
+
+[
+["A","Did you finish the report?"],
+["B","Not yet."],
+["A","When can you complete it?"],
+["B","By this afternoon."]
+],
+
+[
+["A","Could you help me with this task?"],
+["B","Of course."],
+["A","I appreciate it."],
+["B","No problem."]
+],
+
+[
+["A","Let’s schedule a meeting."],
+["B","When are you available?"],
+["A","Tomorrow morning."],
+["B","That works."]
+],
+
+[
+["A","I have a question about the design."],
+["B","Go ahead."],
+["A","Is this version final?"],
+["B","Not yet."]
+],
+
+[
+["A","Can you send me the file?"],
+["B","Sure, I’ll send it now."],
+["A","Thanks."],
+["B","You’re welcome."]
+],
+
+[
+["A","The deadline is tomorrow."],
+["B","I know."],
+["A","Are you ready?"],
+["B","Almost done."]
+],
+
+[
+["A","Let’s take a break."],
+["B","Good idea."],
+["A","Coffee?"],
+["B","Yes, please."]
+],
+
+[
+["A","We need to improve this process."],
+["B","I agree."],
+["A","Any suggestions?"],
+["B","Let’s discuss later."]
+],
+
+[
+["A","Can you join the meeting?"],
+["B","I’m in another call."],
+["A","No problem."],
+["B","I’ll join later."]
+]
+
+];
+
+// ===== RENDER =====
+const container = document.getElementById("container");
+let allLines = [];
+
+dialogs.forEach((dialog, dIndex)=>{
+  const div = document.createElement("div");
+  div.className = "dialog";
+
+  dialog.forEach((line, lIndex)=>{
+    const p = document.createElement("div");
+    p.className = "line " + line[0];
+    p.id = `d${dIndex}_l${lIndex}`;
+    p.innerText = `${line[0]}: ${line[1]}`;
+
+    div.appendChild(p);
+
+    allLines.push({
+      id: p.id,
+      speaker: line[0],
+      text: line[1]
+    });
+  });
+
+  container.appendChild(div);
+});
+
+// ===== SPEECH =====
+const synth = window.speechSynthesis;
+
+function speakAsync(text, speaker){
+  return new Promise(resolve=>{
+    const u = new SpeechSynthesisUtterance(text);
+
+    if(speaker === "A"){
+      u.pitch = 1.2;
+    }else{
+      u.pitch = 0.8;
+    }
+
+    u.lang = "en-US";
+    u.rate = rate();
+
+    u.onend = ()=> setTimeout(resolve, 500);
+
+    synth.speak(u);
+  });
+}
+
+// ===== CONTROL =====
+let index = 0;
+let isPlaying = false;
+let isPaused = false;
+
+async function play(){
+  stop();
+  isPlaying = true;
+  index = 0;
+
+  while(index < allLines.length && isPlaying){
+
+    while(isPaused){
+      await new Promise(r=>setTimeout(r,200));
+    }
+
+    highlight(index);
+
+    let line = allLines[index];
+    await speakAsync(line.text, line.speaker);
+
+    index++;
+  }
+
+  clearHighlight();
+}
+
+function pause(){
+  isPaused = true;
+  synth.pause();
+}
+
+function resume(){
+  isPaused = false;
+  synth.resume();
+}
+
+function stop(){
+  isPlaying = false;
+  isPaused = false;
+  synth.cancel();
+  clearHighlight();
+}
+
+// ===== UI =====
+function highlight(i){
+  clearHighlight();
+
+  const el = document.getElementById(allLines[i].id);
+  if(!el) return;
+
+  el.classList.add("active");
+
+  el.scrollIntoView({
+    behavior:"smooth",
+    block:"center"
+  });
+}
+
+function clearHighlight(){
+  document.querySelectorAll(".line").forEach(el=>{
+    el.classList.remove("active");
+  });
+}
+
+</script>
+
+</body>
+</html>
