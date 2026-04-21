@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Presentation Practice</title>
+
+<style>
+body { font-family: Arial; padding:20px; }
+
+h2 { text-align:center }
+
+.controls { margin-bottom:15px }
+
+button { padding:8px 12px; margin-right:5px }
+
+.line {
+  padding:10px;
+  margin-bottom:8px;
+  border-radius:8px;
+  background:#f5f6fa;
+}
+
+.active {
+  background:#ffeaa7;
+  transform:scale(1.02);
+  transition:0.2s;
+}
+</style>
+</head>
+
+<body>
+
+<h2>📊 Presentation English (Shadowing)</h2>
+
+<div class="controls">
+  <button onclick="play()">▶ Play</button>
+  <button onclick="pause()">⏸ Pause</button>
+  <button onclick="resume()">▶ Resume</button>
+  <button onclick="stop()">⏹ Stop</button>
+
+  Speed:
+  <input type="range" id="speed" min="0.5" max="1.2" step="0.1" value="0.7">
+  <span id="speedVal">0.7</span>
+</div>
+
+<div id="container"></div>
+
+<script>
+
+// ===== SPEED =====
+const speedSlider = document.getElementById("speed");
+const speedVal = document.getElementById("speedVal");
+speedSlider.oninput = ()=> speedVal.innerText = speedSlider.value;
+function rate(){ return parseFloat(speedSlider.value); }
+
+// ===== DATA =====
+const sentences = [
+
+"Good morning everyone.",
+"Thank you for joining today.",
+"Today, I would like to talk about our project.",
+"Let me start with an overview.",
+"First, I will explain the background.",
+"Next, I will show the main results.",
+"Please take a look at this slide.",
+"As you can see here, the data shows growth.",
+"This graph represents our performance.",
+"Now, let’s move to the next point.",
+"In conclusion, our project was successful.",
+"Thank you for your attention.",
+"Do you have any questions?",
+"I will answer your questions now.",
+"Let me clarify that point.",
+"I would like to emphasize this part.",
+"This is an important factor.",
+"Based on this data, we can conclude that...",
+"Let’s summarize the key points.",
+"Finally, thank you very much."
+
+];
+
+// ===== RENDER =====
+const container = document.getElementById("container");
+let allLines = [];
+
+sentences.forEach((text, i)=>{
+  const div = document.createElement("div");
+  div.className = "line";
+  div.id = "line-" + i;
+  div.innerText = text;
+
+  container.appendChild(div);
+
+  allLines.push({
+    id: div.id,
+    text: text
+  });
+});
+
+// ===== SPEECH =====
+const synth = window.speechSynthesis;
+
+function speakAsync(text){
+  return new Promise(resolve=>{
+    const u = new SpeechSynthesisUtterance(text);
+
+    u.lang = "en-US";
+    u.rate = rate();
+    u.pitch = 1;
+
+    u.onend = ()=> setTimeout(resolve, 800);
+
+    synth.speak(u);
+  });
+}
+
+// ===== CONTROL =====
+let index = 0;
+let isPlaying = false;
+let isPaused = false;
+
+async function play(){
+  stop();
+  isPlaying = true;
+  index = 0;
+
+  while(index < allLines.length && isPlaying){
+
+    while(isPaused){
+      await new Promise(r=>setTimeout(r,200));
+    }
+
+    highlight(index);
+
+    await speakAsync(allLines[index].text);
+
+    index++;
+  }
+
+  clearHighlight();
+}
+
+function pause(){
+  isPaused = true;
+  synth.pause();
+}
+
+function resume(){
+  isPaused = false;
+  synth.resume();
+}
+
+function stop(){
+  isPlaying = false;
+  isPaused = false;
+  synth.cancel();
+  clearHighlight();
+}
+
+// ===== UI =====
+function highlight(i){
+  clearHighlight();
+
+  const el = document.getElementById(allLines[i].id);
+  if(!el) return;
+
+  el.classList.add("active");
+
+  el.scrollIntoView({
+    behavior:"smooth",
+    block:"center"
+  });
+}
+
+function clearHighlight(){
+  document.querySelectorAll(".line").forEach(el=>{
+    el.classList.remove("active");
+  });
+}
+
+</script>
+
+</body>
+</html>
