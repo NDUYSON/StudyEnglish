@@ -6,11 +6,8 @@
 
 <style>
 body { font-family: Arial; padding:20px; }
-
 h2 { text-align:center }
-
 .controls { margin-bottom:15px }
-
 button { padding:8px 12px; margin-right:5px }
 
 .dialog {
@@ -20,25 +17,20 @@ button { padding:8px 12px; margin-right:5px }
   background:#f5f6fa;
 }
 
-.line {
-  padding:6px;
-  border-radius:6px;
-}
-
+.line { padding:6px; border-radius:6px; }
 .A { color:#0984e3; }
 .B { color:#d63031; }
 
 .active {
   background:#ffeaa7;
   transform:scale(1.02);
-  transition:0.2s;
 }
 </style>
 </head>
 
 <body>
 
-<h2>🗣️ Daily Appointment Dialog (Shadowing)</h2>
+<h2>🗣️ Daily Appointment Dialog</h2>
 
 <div class="controls">
   <button onclick="play()">▶ Play</button>
@@ -58,219 +50,94 @@ button { padding:8px 12px; margin-right:5px }
 // ===== SPEED =====
 const speedSlider = document.getElementById("speed");
 const speedVal = document.getElementById("speedVal");
-
 speedSlider.oninput = ()=> speedVal.innerText = speedSlider.value;
-
 function rate(){ return parseFloat(speedSlider.value); }
 
-// ===== 🔥 VOICE FIX =====
-let usVoice = null;
+// ===== VOICE PRO =====
+let usVoice=null, voicesLoaded=false;
 
 function loadVoices(){
-  const voices = speechSynthesis.getVoices();
+  let v = speechSynthesis.getVoices();
+  if(!v.length) return;
 
-  usVoice = voices.find(v => v.name.includes("Google US English"))
-          || voices.find(v => v.lang === "en-US")
-          || voices.find(v => v.lang.includes("en"));
+  usVoice = v.find(x=>x.name.includes("Samantha")) ||
+            v.find(x=>x.lang==="en-US") ||
+            v.find(x=>x.lang.includes("en"));
 
-  console.log("US Voice:", usVoice);
+  voicesLoaded=true;
 }
+speechSynthesis.onvoiceschanged=loadVoices;
+setTimeout(loadVoices,300);
 
-speechSynthesis.onvoiceschanged = loadVoices;
-
-
-// ===== DIALOG DATA =====
+// ===== DATA =====
 const dialogs = [
-
-[
-["A","Hey, are you free this weekend?"],
-["B","Yes, I am. What’s up?"],
-["A","Let’s go for coffee."],
-["B","Sounds good!"]
-],
-
-[
-["A","Do you want to have lunch tomorrow?"],
-["B","Sure, what time?"],
-["A","Around 12?"],
-["B","Perfect."]
-],
-
-[
-["A","Can we meet tonight?"],
-["B","I’m a bit busy."],
-["A","How about tomorrow then?"],
-["B","That works."]
-],
-
-[
-["A","Are you available this evening?"],
-["B","Yes, I am."],
-["A","Let’s watch a movie."],
-["B","Great idea."]
-],
-
-[
-["A","Do you want to study together?"],
-["B","Yes, let’s do it."],
-["A","At the library?"],
-["B","See you there."]
-],
-
-[
-["A","Can you meet me after work?"],
-["B","Sure."],
-["A","Let’s grab dinner."],
-["B","I’m hungry already!"]
-],
-
-[
-["A","Are you free on Friday?"],
-["B","Yes."],
-["A","Let’s hang out."],
-["B","Cool."]
-],
-
-[
-["A","Do you want to go shopping?"],
-["B","Sure."],
-["A","This afternoon?"],
-["B","Let’s go."]
-],
-
-[
-["A","Can we meet earlier?"],
-["B","How early?"],
-["A","Around 9?"],
-["B","Okay."]
-],
-
-[
-["A","Are you busy right now?"],
-["B","Not really."],
-["A","Let’s talk for a bit."],
-["B","Sure."]
-]
-
+[["A","Hey, are you free this weekend?"],["B","Yes, I am."],["A","Let’s go for coffee."],["B","Sounds good!"]],
+[["A","Do you want lunch tomorrow?"],["B","Sure."],["A","At 12?"],["B","Perfect."]]
 ];
 
 // ===== RENDER =====
-const container = document.getElementById("container");
+const container=document.getElementById("container");
+let allLines=[];
 
-let allLines = [];
+dialogs.forEach((d,di)=>{
+  let box=document.createElement("div");
+  box.className="dialog";
 
-dialogs.forEach((dialog, dIndex)=>{
-  const div = document.createElement("div");
-  div.className = "dialog";
+  d.forEach((l,li)=>{
+    let el=document.createElement("div");
+    el.className="line "+l[0];
+    el.id=`d${di}_${li}`;
+    el.innerText=l[0]+": "+l[1];
+    box.appendChild(el);
 
-  dialog.forEach((line, lIndex)=>{
-    const p = document.createElement("div");
-    p.className = "line " + line[0];
-    p.id = `d${dIndex}_l${lIndex}`;
-    p.innerText = `${line[0]}: ${line[1]}`;
-
-    div.appendChild(p);
-
-    allLines.push({
-      id: p.id,
-      speaker: line[0],
-      text: line[1]
-    });
+    allLines.push({id:el.id,text:l[1],speaker:l[0]});
   });
 
-  container.appendChild(div);
+  container.appendChild(box);
 });
 
-// ===== SPEECH =====
-const synth = window.speechSynthesis;
-
-function speakAsync(text, speaker){
-  return new Promise(resolve=>{
-    const u = new SpeechSynthesisUtterance(text);
-
-    u.lang = "en-US";
-    u.rate = rate();
-
-    // phân biệt giọng A/B
-    u.pitch = speaker === "A" ? 1.2 : 0.8;
-
-    // ✅ ép giọng US
-    if(usVoice){
-      u.voice = usVoice;
-    }
-
-    u.onend = ()=> setTimeout(resolve, 800);
-
-    synth.speak(u);
+// ===== SPEAK =====
+function speakAsync(text,speaker){
+  return new Promise(res=>{
+    let u=new SpeechSynthesisUtterance(text);
+    u.lang="en-US";
+    u.rate=rate();
+    u.pitch=speaker==="A"?1.2:0.8;
+    if(usVoice) u.voice=usVoice;
+    u.onend=()=>setTimeout(res,400);
+    speechSynthesis.speak(u);
   });
 }
 
 // ===== CONTROL =====
-let index = 0;
-let isPlaying = false;
-let isPaused = false;
+let i=0,playing=false,paused=false;
 
 async function play(){
-  stop();
-  isPlaying = true;
-  index = 0;
-
-  while(index < allLines.length && isPlaying){
-
-    while(isPaused){
-      await new Promise(r=>setTimeout(r,200));
-    }
-
-    highlight(index);
-
-    let line = allLines[index];
-    await speakAsync(line.text, line.speaker);
-
-    index++;
+  stop(); playing=true; i=0;
+  while(i<allLines.length && playing){
+    while(paused) await new Promise(r=>setTimeout(r,200));
+    highlight(i);
+    await speakAsync(allLines[i].text,allLines[i].speaker);
+    i++;
   }
-
-  clearHighlight();
+  clear();
 }
 
-function pause(){
-  isPaused = true;
-  synth.pause();
-}
-
-function resume(){
-  isPaused = false;
-  synth.resume();
-}
-
-function stop(){
-  isPlaying = false;
-  isPaused = false;
-  synth.cancel();
-  clearHighlight();
-}
+function pause(){ paused=true; speechSynthesis.pause(); }
+function resume(){ paused=false; speechSynthesis.resume(); }
+function stop(){ playing=false; paused=false; speechSynthesis.cancel(); clear(); }
 
 // ===== UI =====
 function highlight(i){
-  clearHighlight();
-
-  const el = document.getElementById(allLines[i].id);
-  if(!el) return;
-
+  clear();
+  let el=document.getElementById(allLines[i].id);
   el.classList.add("active");
-
-  el.scrollIntoView({
-    behavior:"smooth",
-    block:"center"
-  });
+  el.scrollIntoView({behavior:"smooth",block:"center"});
 }
-
-function clearHighlight(){
-  document.querySelectorAll(".line").forEach(el=>{
-    el.classList.remove("active");
-  });
+function clear(){
+  document.querySelectorAll(".line").forEach(x=>x.classList.remove("active"));
 }
 
 </script>
-
 </body>
 </html>
