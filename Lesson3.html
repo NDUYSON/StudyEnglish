@@ -2,270 +2,258 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Lesson 3 - Role Play PRO</title>
+<title>Daily Appointment Dialog Practice</title>
 
 <style>
-body { font-family: Arial; background:#f5f6fa; padding:20px; }
-.container { max-width:800px; margin:auto; }
-.card {
-  background:white;
-  border-radius:15px;
-  padding:20px;
-  margin-top:20px;
-  box-shadow:0 5px 15px rgba(0,0,0,0.1);
+body { font-family: Arial; padding:20px; }
+
+h2 { text-align:center }
+
+.controls { margin-bottom:15px }
+
+button { padding:8px 12px; margin-right:5px }
+
+.dialog {
+  margin-bottom:20px;
+  padding:10px;
+  border-radius:10px;
+  background:#f5f6fa;
 }
-.lineA { color:#0984e3; font-weight:bold; margin:10px 0; }
-.lineB { color:green; margin:10px 0; }
-.highlight { background:#ffeaa7; padding:5px; border-radius:6px; }
-.controls button {
-  margin:5px; padding:10px 15px;
-  border:none; border-radius:8px;
-  background:#0984e3; color:white;
+
+.line {
+  padding:6px;
+  border-radius:6px;
 }
-.countdown {
-  font-size:40px; color:red;
-  font-weight:bold; margin-top:10px;
+
+.A { color:#0984e3; }
+.B { color:#d63031; }
+
+.active {
+  background:#ffeaa7;
+  transform:scale(1.02);
+  transition:0.2s;
 }
+
 </style>
 </head>
 
 <body>
-<div class="container">
 
-<h2>🎭 Lesson 3: Role Play</h2>
-
-<div class="card" id="chatBox"></div>
-<div id="countdown" class="countdown"></div>
+<h2>🗣️ Daily Appointment Dialog (Shadowing)</h2>
 
 <div class="controls">
-  <button onclick="start()">▶ Start</button>
-  <button onclick="next()">➡ Next</button>
-  <button onclick="showAnswer()">👁 Show</button>
-  <button onclick="toggleAuto()">🤖 Auto: OFF</button>
-
-  <br><br>
-
-  <!-- 🔥 NEW RANGE SELECT -->
-  From:
-  <select id="startSelect"></select>
-  To:
-  <select id="endSelect"></select>
-
-  <br><br>
+  <button onclick="play()">▶ Play</button>
+  <button onclick="pause()">⏸ Pause</button>
+  <button onclick="resume()">▶ Resume</button>
+  <button onclick="stop()">⏹ Stop</button>
 
   Speed:
-  <input type="range" id="speedSlider" min="0.3" max="1.5" step="0.1" value="0.5">
-  <span id="speedValue">1.0</span>
-
-  Voice:
-  <select id="voiceSelect"></select>
-
-  <br><br>
-
-  Thinking:
-  <select id="delayQ">
-    <option value="3000">3s</option>
-    <option value="4000">4s</option>
-    <option value="5000">5s</option>
-    <option value="6000">6s</option>
-  </select>
-
-  After Answer:
-  <select id="delayA">
-    <option value="3000">3s</option>
-    <option value="4000">4s</option>
-    <option value="5000">5s</option>
-    <option value="6000">6s</option>
-  </select>
+  <input type="range" id="speed" min="0.5" max="1.2" step="0.1" value="0.7">
+  <span id="speedVal">0.7</span>
 </div>
 
-</div>
+<div id="container"></div>
 
 <script>
 
-// ===== DATA =====
-const pairs = [
-  {q:"What time do you wake up?", a:"I wake up at 6 a.m."},
-  {q:"How do you usually get up in the morning?", a:"I usually get up quickly every morning."},
-  {q:"When do you brush your teeth?", a:"I brush my teeth after waking up every day."},
-  {q:"When do you wash your face?", a:"I wash my face after waking up."},
-  {q:"When do you take a shower?", a:"I take a shower after work everyday."},
-  {q:"What time do you have breakfast?", a:"I have breakfast at around 7 A.M every morning."},
-  {q:"Do you drink coffee?", a:"I drink coffee every morning."},
-  {q:"What time do you go to work?", a:"I go to work at around 8 A.M by car."},
-  {q:"What time do you start work?", a:"I start work at 8:30 A.M."},
-  {q:"When do you check emails?", a:"I check emails in the morning."},
-  {q:"What time do you have lunch?", a:"I have lunch at noon in company."},
-  {q:"When do you take a break?", a:"I take a break at around 3 P.M."},
-  {q:"What time do you finish work?", a:"I finish work at 5:30 P.M."},
-  {q:"What do you do after work?", a:"I always go home after work."},
-  {q:"When do you cook dinner?", a:"I cook dinner in the evening."},
-  {q:"What time do you have dinner?", a:"I have dinner at around 7 P.M."},
-  {q:"What do you do after dinner?", a:"I watch TV after dinner."},
-  {q:"When do you use your phone?", a:"I use my phone before bed."},
-  {q:"When do you read a book?", a:"I read a book at night."},
-  {q:"What time do you go to bed?", a:"I go to bed at around 11 P.M."},
+// ===== SPEED =====
+const speedSlider = document.getElementById("speed");
+const speedVal = document.getElementById("speedVal");
 
-  {q:"When do you make the bed?", a:"I make the bed every morning."},
-  {q:"When do you get dressed?", a:"I get dressed before breakfast."},
-  {q:"What time do you leave the house?", a:"I leave the house at 7:30 A.M."},
-  {q:"How do you go to work?", a:"I catch the bus to work."},
-  {q:"How do you go to work every day?", a:"I drive to work every day."},
-  {q:"What time do you arrive at work?", a:"I arrive at work at 8 A.M."},
-  {q:"What do you do when you start work?", a:"I turn on the computer when I start work."},
-  {q:"When do you attend a meeting?", a:"I attend a meeting every Monday."},
-  {q:"How often do you write a report?", a:"I write a report every week."},
-  {q:"When do you talk to colleagues?", a:"I talk to colleagues during breaks."},
-  {q:"Where do you answer calls?", a:"I answer calls in the office."},
-  {q:"How often do you send emails?", a:"I send emails every day."},
-  {q:"When do you have a meeting?", a:"I have a meeting in the afternoon."},
-  {q:"What do you do during meetings?", a:"I take notes during meetings."},
-  {q:"When do you eat snacks?", a:"I eat snacks in the afternoon."},
-  {q:"When do you go shopping?", a:"I go shopping on weekends."},
-  {q:"When do you buy groceries?", a:"I buy groceries after work."},
-  {q:"When do you clean the house?", a:"I clean the house on Sunday."},
-  {q:"When do you do the laundry?", a:"I do the laundry every weekend."},
-  {q:"When do you wash the dishes?", a:"I wash the dishes after dinner."},
-  {q:"When do you take out the trash?", a:"I take out the trash every evening."},
-  {q:"How often do you exercise?", a:"I exercise three times a week."},
-  {q:"When do you go for a walk?", a:"I go for a walk after dinner."},
-  {q:"When do you listen to music?", a:"I listen to music before bed."},
-  {q:"What do you do on your phone?", a:"I play games on my phone."},
-  {q:"How often do you study English?", a:"I study English every day."},
-  {q:"When do you review lessons?", a:"I review lessons at night."},
-  {q:"When do you plan the day?", a:"I plan the day in the morning."},
-  {q:"When do you set an alarm?", a:"I set an alarm before going to bed."},
-  {q:"How do you fall asleep at night?", a:"I fall asleep quickly at night."}
+speedSlider.oninput = ()=> speedVal.innerText = speedSlider.value;
+
+function rate(){ return parseFloat(speedSlider.value); }
+
+// ===== DIALOG DATA =====
+const dialogs = [
+
+[
+["A","Hey, are you free this weekend?"],
+["B","Yes, I am. What’s up?"],
+["A","Let’s go for coffee."],
+["B","Sounds good!"]
+],
+
+[
+["A","Do you want to have lunch tomorrow?"],
+["B","Sure, what time?"],
+["A","Around 12?"],
+["B","Perfect."]
+],
+
+[
+["A","Can we meet tonight?"],
+["B","I’m a bit busy."],
+["A","How about tomorrow then?"],
+["B","That works."]
+],
+
+[
+["A","Are you available this evening?"],
+["B","Yes, I am."],
+["A","Let’s watch a movie."],
+["B","Great idea."]
+],
+
+[
+["A","Do you want to study together?"],
+["B","Yes, let’s do it."],
+["A","At the library?"],
+["B","See you there."]
+],
+
+[
+["A","Can you meet me after work?"],
+["B","Sure."],
+["A","Let’s grab dinner."],
+["B","I’m hungry already!"]
+],
+
+[
+["A","Are you free on Friday?"],
+["B","Yes."],
+["A","Let’s hang out."],
+["B","Cool."]
+],
+
+[
+["A","Do you want to go shopping?"],
+["B","Sure."],
+["A","This afternoon?"],
+["B","Let’s go."]
+],
+
+[
+["A","Can we meet earlier?"],
+["B","How early?"],
+["A","Around 9?"],
+["B","Okay."]
+],
+
+[
+["A","Are you busy right now?"],
+["B","Not really."],
+["A","Let’s talk for a bit."],
+["B","Sure."]
+]
+
 ];
 
-// ===== GLOBAL =====
-let current = 0;
-let startIdx = 0;
-let endIdx = pairs.length - 1;
+// ===== RENDER =====
+const container = document.getElementById("container");
 
-let autoMode = false;
-let currentAnswer = "";
-let currentAnswerDiv = null;
+let allLines = [];
 
-// ===== INIT SELECT =====
-const startSelect = document.getElementById("startSelect");
-const endSelect = document.getElementById("endSelect");
+dialogs.forEach((dialog, dIndex)=>{
+  const div = document.createElement("div");
+  div.className = "dialog";
 
-pairs.forEach((p,i)=>{
-  startSelect.add(new Option((i+1)+". "+p.q, i));
-  endSelect.add(new Option((i+1)+". "+p.q, i));
-});
+  dialog.forEach((line, lIndex)=>{
+    const p = document.createElement("div");
+    p.className = "line " + line[0];
+    p.id = `d${dIndex}_l${lIndex}`;
+    p.innerText = `${line[0]}: ${line[1]}`;
 
-// ===== SPEED =====
-speedSlider.oninput = () => speedValue.innerText = speedSlider.value;
-function getRate(){ return parseFloat(speedSlider.value); }
+    div.appendChild(p);
 
-// ===== VOICE =====
-let voices = [];
-function loadVoices(){
-  const all = speechSynthesis.getVoices();
-  voices = all.filter(v => v.lang==="en-US");
-  voiceSelect.innerHTML="";
-  voices.forEach((v,i)=>{
-    const opt=document.createElement("option");
-    opt.value=i;
-    opt.text="🇺🇸 "+v.name;
-    voiceSelect.appendChild(opt);
-  });
-}
-speechSynthesis.onvoiceschanged=loadVoices;
-setTimeout(loadVoices,500);
-
-// ===== SPEAK =====
-function speak(text,onEnd=null){
-  const u=new SpeechSynthesisUtterance(text);
-  u.rate=getRate();
-  if(voices[voiceSelect.value]) u.voice=voices[voiceSelect.value];
-  if(onEnd) u.onend=onEnd;
-  speechSynthesis.cancel();
-  speechSynthesis.speak(u);
-}
-
-// ===== START =====
-function start(){
-  startIdx = parseInt(startSelect.value);
-  endIdx = parseInt(endSelect.value);
-
-  if(startIdx > endIdx){
-    alert("Start must be before End");
-    return;
-  }
-
-  current = startIdx;
-  chatBox.innerHTML="";
-  load();
-}
-
-// ===== LOAD =====
-function load(){
-  const item=pairs[current];
-  currentAnswer=item.a;
-
-  const q=document.createElement("div");
-  q.className="lineA highlight";
-  q.innerText="A: "+item.q;
-
-  const a=document.createElement("div");
-  a.className="lineB";
-  a.innerText="👉 YOU: ???";
-
-  currentAnswerDiv=a;
-
-  chatBox.appendChild(q);
-  chatBox.appendChild(a);
-
-  speak(item.q,()=>{ if(autoMode) runAuto(); });
-}
-
-// ===== COUNTDOWN =====
-function startCountdown(ms,cb){
-  let t=ms/1000;
-  countdown.innerText=t;
-  const i=setInterval(()=>{
-    t--;
-    countdown.innerText=t;
-    if(t<=0){ clearInterval(i); countdown.innerText=""; cb(); }
-  },1000);
-}
-
-// ===== AUTO =====
-function runAuto(){
-  const dQ=+delayQ.value;
-  const dA=+delayA.value;
-
-  startCountdown(dQ,()=>{
-    currentAnswerDiv.innerText="YOU: "+currentAnswer;
-    speak(currentAnswer,()=>{
-      startCountdown(dA,next);
+    allLines.push({
+      id: p.id,
+      speaker: line[0],
+      text: line[1]
     });
   });
+
+  container.appendChild(div);
+});
+
+// ===== SPEECH =====
+const synth = window.speechSynthesis;
+
+function speakAsync(text, speaker){
+  return new Promise(resolve=>{
+    const u = new SpeechSynthesisUtterance(text);
+
+    // 🎯 2 giọng khác nhau
+    if(speaker === "A"){
+      u.lang = "en-US";
+      u.pitch = 1.5;
+    }else{
+      u.lang = "en-US";
+      u.pitch = 1.2;
+    }
+
+    u.rate = rate();
+
+    u.onend = ()=> setTimeout(resolve, 800);
+
+    synth.speak(u);
+  });
 }
 
-// ===== MANUAL =====
-function showAnswer(){
-  currentAnswerDiv.innerText="YOU: "+currentAnswer;
-  speak(currentAnswer);
-}
+// ===== CONTROL =====
+let index = 0;
+let isPlaying = false;
+let isPaused = false;
 
-// ===== NEXT =====
-function next(){
-  current++;
-  if(current > endIdx){
-    alert("Lesson Completed!!!");
-    return;
+async function play(){
+  stop();
+  isPlaying = true;
+  index = 0;
+
+  while(index < allLines.length && isPlaying){
+
+    while(isPaused){
+      await new Promise(r=>setTimeout(r,200));
+    }
+
+    highlight(index);
+
+    let line = allLines[index];
+    await speakAsync(line.text, line.speaker);
+
+    index++;
   }
-  load();
+
+  clearHighlight();
 }
 
-// ===== TOGGLE =====
-function toggleAuto(){
-  autoMode=!autoMode;
-  event.target.innerText=autoMode?"🤖 Auto: ON":"🤖 Auto: OFF";
+function pause(){
+  isPaused = true;
+  synth.pause();
+}
+
+function resume(){
+  isPaused = false;
+  synth.resume();
+}
+
+function stop(){
+  isPlaying = false;
+  isPaused = false;
+  synth.cancel();
+  clearHighlight();
+}
+
+// ===== UI =====
+function highlight(i){
+  clearHighlight();
+
+  const el = document.getElementById(allLines[i].id);
+  if(!el) return;
+
+  el.classList.add("active");
+
+  // ✅ auto scroll center
+  el.scrollIntoView({
+    behavior:"smooth",
+    block:"center"
+  });
+}
+
+function clearHighlight(){
+  document.querySelectorAll(".line").forEach(el=>{
+    el.classList.remove("active");
+  });
 }
 
 </script>
