@@ -2,239 +2,270 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Lesson 2 - Conversation Practice PRO</title>
+<title>Lesson 3 - Role Play PRO</title>
 
 <style>
-body { font-family: Arial; padding: 20px; background:#f5f6fa;}
-.container { max-width: 750px; margin: auto; }
-
+body { font-family: Arial; background:#f5f6fa; padding:20px; }
+.container { max-width:800px; margin:auto; }
 .card {
-  background: white;
-  border-radius: 15px;
-  padding: 25px;
-  margin-top: 20px;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  background:white;
+  border-radius:15px;
+  padding:20px;
+  margin-top:20px;
+  box-shadow:0 5px 15px rgba(0,0,0,0.1);
 }
-
-.question { font-size: 22px; font-weight: bold; }
-.answer { margin-top: 15px; color: green; display: none; font-size: 18px; }
-
-.controls { margin-top:20px; }
+.lineA { color:#0984e3; font-weight:bold; margin:10px 0; }
+.lineB { color:green; margin:10px 0; }
+.highlight { background:#ffeaa7; padding:5px; border-radius:6px; }
 .controls button {
-  margin:5px;
-  padding: 10px 18px;
-  border: none;
-  border-radius: 8px;
-  background:#0984e3;
-  color:white;
-  cursor:pointer;
+  margin:5px; padding:10px 15px;
+  border:none; border-radius:8px;
+  background:#0984e3; color:white;
 }
-.controls button:hover { background:#74b9ff; }
-
 .countdown {
-  font-size: 35px;
-  color: red;
-  margin-top: 10px;
-  font-weight: bold;
+  font-size:40px; color:red;
+  font-weight:bold; margin-top:10px;
 }
-
-.status { margin-top:10px; color:#555; }
 </style>
 </head>
 
 <body>
-
 <div class="container">
-  <h2>🗣 Lesson 2: Conversation Practice PRO</h2>
 
-  <div class="card">
-    <div id="question" class="question">Press Start</div>
-    <div id="countdown" class="countdown"></div>
-    <div id="status" class="status"></div>
-    <div id="answer" class="answer"></div>
-  </div>
+<h2>🎭 Lesson 3: Role Play</h2>
 
-  <div class="controls">
-    <button onclick="startConversation()">▶ Start</button>
-    <button onclick="showAnswer()">👁 Show</button>
-    <button onclick="nextQuestion()">➡ Next</button>
-    <button onclick="repeatQuestion()">🔊 Repeat</button>
+<div class="card" id="chatBox"></div>
+<div id="countdown" class="countdown"></div>
 
-    <button onclick="toggleAuto()">🤖 Auto: OFF</button>
+<div class="controls">
+  <button onclick="start()">▶ Start</button>
+  <button onclick="next()">➡ Next</button>
+  <button onclick="showAnswer()">👁 Show</button>
+  <button onclick="toggleAuto()">🤖 Auto: OFF</button>
 
-    Delay:
-    <select id="delay">
-      <option value="3000">3s</option>
-      <option value="5000" selected>5s</option>
-      <option value="7000">7s</option>
-    </select>
+  <br><br>
 
-    <button onclick="startRecording()">🎤 Rec</button>
-    <button onclick="stopRecording()">⏹ Stop</button>
-  </div>
+  <!-- 🔥 NEW RANGE SELECT -->
+  From:
+  <select id="startSelect"></select>
+  To:
+  <select id="endSelect"></select>
 
-  <div class="status">
-    Practiced: <span id="score">0</span> questions
-  </div>
+  <br><br>
+
+  Speed:
+  <input type="range" id="speedSlider" min="0.3" max="1.5" step="0.1" value="0.5">
+  <span id="speedValue">1.0</span>
+
+  Voice:
+  <select id="voiceSelect"></select>
+
+  <br><br>
+
+  Thinking:
+  <select id="delayQ">
+    <option value="3000">3s</option>
+    <option value="4000">4s</option>
+    <option value="5000">5s</option>
+    <option value="6000">6s</option>
+  </select>
+
+  After Answer:
+  <select id="delayA">
+    <option value="3000">3s</option>
+    <option value="4000">4s</option>
+    <option value="5000">5s</option>
+    <option value="6000">6s</option>
+  </select>
+</div>
+
 </div>
 
 <script>
 
 // ===== DATA =====
-const conversations = [
-  { q: "What time do you wake up?", a: "I wake up at 6 a.m." },
-  { q: "What do you do in the morning?", a: "I brush my teeth and have breakfast." },
-  { q: "Do you drink coffee?", a: "Yes, I drink coffee every morning." },
-  { q: "What time do you go to work?", a: "I go to work at 8 a.m." },
-  { q: "What do you do after work?", a: "I go home and cook dinner." },
-  { q: "What do you do at night?", a: "I watch TV and go to bed." },
-  { q: "Do you eat breakfast every day?", a: "Yes, I eat breakfast every day." },
-  { q: "What time do you have lunch?", a: "I have lunch at 12 p.m." },
-  { q: "Do you take a break?", a: "Yes, I take a break in the afternoon." },
-  { q: "What time do you go to bed?", a: "I go to bed at 10 p.m." }
+const pairs = [
+  {q:"What time do you wake up?", a:"I wake up at 6 a.m."},
+  {q:"How do you usually get up in the morning?", a:"I usually get up quickly every morning."},
+  {q:"When do you brush your teeth?", a:"I brush my teeth after waking up every day."},
+  {q:"When do you wash your face?", a:"I wash my face after waking up."},
+  {q:"When do you take a shower?", a:"I take a shower after work everyday."},
+  {q:"What time do you have breakfast?", a:"I have breakfast at around 7 A.M every morning."},
+  {q:"Do you drink coffee?", a:"I drink coffee every morning."},
+  {q:"What time do you go to work?", a:"I go to work at around 8 A.M by car."},
+  {q:"What time do you start work?", a:"I start work at 8:30 A.M."},
+  {q:"When do you check emails?", a:"I check emails in the morning."},
+  {q:"What time do you have lunch?", a:"I have lunch at noon in company."},
+  {q:"When do you take a break?", a:"I take a break at around 3 P.M."},
+  {q:"What time do you finish work?", a:"I finish work at 5:30 P.M."},
+  {q:"What do you do after work?", a:"I always go home after work."},
+  {q:"When do you cook dinner?", a:"I cook dinner in the evening."},
+  {q:"What time do you have dinner?", a:"I have dinner at around 7 P.M."},
+  {q:"What do you do after dinner?", a:"I watch TV after dinner."},
+  {q:"When do you use your phone?", a:"I use my phone before bed."},
+  {q:"When do you read a book?", a:"I read a book at night."},
+  {q:"What time do you go to bed?", a:"I go to bed at around 11 P.M."},
+
+  {q:"When do you make the bed?", a:"I make the bed every morning."},
+  {q:"When do you get dressed?", a:"I get dressed before breakfast."},
+  {q:"What time do you leave the house?", a:"I leave the house at 7:30 A.M."},
+  {q:"How do you go to work?", a:"I catch the bus to work."},
+  {q:"How do you go to work every day?", a:"I drive to work every day."},
+  {q:"What time do you arrive at work?", a:"I arrive at work at 8 A.M."},
+  {q:"What do you do when you start work?", a:"I turn on the computer when I start work."},
+  {q:"When do you attend a meeting?", a:"I attend a meeting every Monday."},
+  {q:"How often do you write a report?", a:"I write a report every week."},
+  {q:"When do you talk to colleagues?", a:"I talk to colleagues during breaks."},
+  {q:"Where do you answer calls?", a:"I answer calls in the office."},
+  {q:"How often do you send emails?", a:"I send emails every day."},
+  {q:"When do you have a meeting?", a:"I have a meeting in the afternoon."},
+  {q:"What do you do during meetings?", a:"I take notes during meetings."},
+  {q:"When do you eat snacks?", a:"I eat snacks in the afternoon."},
+  {q:"When do you go shopping?", a:"I go shopping on weekends."},
+  {q:"When do you buy groceries?", a:"I buy groceries after work."},
+  {q:"When do you clean the house?", a:"I clean the house on Sunday."},
+  {q:"When do you do the laundry?", a:"I do the laundry every weekend."},
+  {q:"When do you wash the dishes?", a:"I wash the dishes after dinner."},
+  {q:"When do you take out the trash?", a:"I take out the trash every evening."},
+  {q:"How often do you exercise?", a:"I exercise three times a week."},
+  {q:"When do you go for a walk?", a:"I go for a walk after dinner."},
+  {q:"When do you listen to music?", a:"I listen to music before bed."},
+  {q:"What do you do on your phone?", a:"I play games on my phone."},
+  {q:"How often do you study English?", a:"I study English every day."},
+  {q:"When do you review lessons?", a:"I review lessons at night."},
+  {q:"When do you plan the day?", a:"I plan the day in the morning."},
+  {q:"When do you set an alarm?", a:"I set an alarm before going to bed."},
+  {q:"How do you fall asleep at night?", a:"I fall asleep quickly at night."}
 ];
 
 // ===== GLOBAL =====
 let current = 0;
+let startIdx = 0;
+let endIdx = pairs.length - 1;
+
 let autoMode = false;
-let autoTimer = null;
-let score = 0;
+let currentAnswer = "";
+let currentAnswerDiv = null;
+
+// ===== INIT SELECT =====
+const startSelect = document.getElementById("startSelect");
+const endSelect = document.getElementById("endSelect");
+
+pairs.forEach((p,i)=>{
+  startSelect.add(new Option((i+1)+". "+p.q, i));
+  endSelect.add(new Option((i+1)+". "+p.q, i));
+});
+
+// ===== SPEED =====
+speedSlider.oninput = () => speedValue.innerText = speedSlider.value;
+function getRate(){ return parseFloat(speedSlider.value); }
+
+// ===== VOICE =====
+let voices = [];
+function loadVoices(){
+  const all = speechSynthesis.getVoices();
+  voices = all.filter(v => v.lang==="en-US");
+  voiceSelect.innerHTML="";
+  voices.forEach((v,i)=>{
+    const opt=document.createElement("option");
+    opt.value=i;
+    opt.text="🇺🇸 "+v.name;
+    voiceSelect.appendChild(opt);
+  });
+}
+speechSynthesis.onvoiceschanged=loadVoices;
+setTimeout(loadVoices,500);
 
 // ===== SPEAK =====
-function speak(text) {
-  const u = new SpeechSynthesisUtterance(text);
-  u.lang = "en-US";
+function speak(text,onEnd=null){
+  const u=new SpeechSynthesisUtterance(text);
+  u.rate=getRate();
+  if(voices[voiceSelect.value]) u.voice=voices[voiceSelect.value];
+  if(onEnd) u.onend=onEnd;
   speechSynthesis.cancel();
   speechSynthesis.speak(u);
 }
 
+// ===== START =====
+function start(){
+  startIdx = parseInt(startSelect.value);
+  endIdx = parseInt(endSelect.value);
+
+  if(startIdx > endIdx){
+    alert("Start must be before End");
+    return;
+  }
+
+  current = startIdx;
+  chatBox.innerHTML="";
+  load();
+}
+
 // ===== LOAD =====
-function loadQuestion() {
-  clearTimeout(autoTimer);
+function load(){
+  const item=pairs[current];
+  currentAnswer=item.a;
 
-  current = Math.floor(Math.random() * conversations.length);
+  const q=document.createElement("div");
+  q.className="lineA highlight";
+  q.innerText="A: "+item.q;
 
-  document.getElementById("answer").style.display = "none";
-  document.getElementById("answer").innerText = conversations[current].a;
+  const a=document.createElement("div");
+  a.className="lineB";
+  a.innerText="👉 YOU: ???";
 
-  document.getElementById("question").innerText = conversations[current].q;
-  document.getElementById("status").innerText = "Listen...";
+  currentAnswerDiv=a;
 
-  speak(conversations[current].q);
+  chatBox.appendChild(q);
+  chatBox.appendChild(a);
 
-  startCountdown(3);
+  speak(item.q,()=>{ if(autoMode) runAuto(); });
 }
 
 // ===== COUNTDOWN =====
-function startCountdown(sec) {
-  let time = sec;
-  const cd = document.getElementById("countdown");
+function startCountdown(ms,cb){
+  let t=ms/1000;
+  countdown.innerText=t;
+  const i=setInterval(()=>{
+    t--;
+    countdown.innerText=t;
+    if(t<=0){ clearInterval(i); countdown.innerText=""; cb(); }
+  },1000);
+}
 
-  cd.innerText = time;
+// ===== AUTO =====
+function runAuto(){
+  const dQ=+delayQ.value;
+  const dA=+delayA.value;
 
-  const t = setInterval(() => {
-    time--;
-    cd.innerText = time;
-
-    if (time <= 0) {
-      clearInterval(t);
-      cd.innerText = "🎤 Speak!";
-      document.getElementById("status").innerText = "Say your answer!";
-    }
-  }, 1000);
+  startCountdown(dQ,()=>{
+    currentAnswerDiv.innerText="YOU: "+currentAnswer;
+    speak(currentAnswer,()=>{
+      startCountdown(dA,next);
+    });
+  });
 }
 
 // ===== MANUAL =====
-function startConversation() {
-  loadQuestion();
+function showAnswer(){
+  currentAnswerDiv.innerText="YOU: "+currentAnswer;
+  speak(currentAnswer);
 }
 
-function showAnswer() {
-  const ans = document.getElementById("answer");
-  ans.style.display = "block";
-  speak(ans.innerText);
-
-  score++;
-  document.getElementById("score").innerText = score;
-}
-
-function nextQuestion() {
-  loadQuestion();
-}
-
-function repeatQuestion() {
-  speak(conversations[current].q);
-}
-
-// ===== AUTO MODE =====
-function toggleAuto() {
-  autoMode = !autoMode;
-
-  const btn = document.querySelector("button[onclick='toggleAuto()']");
-  btn.innerText = autoMode ? "🤖 Auto: ON" : "🤖 Auto: OFF";
-
-  if (autoMode) runAuto();
-  else clearTimeout(autoTimer);
-}
-
-function runAuto() {
-  if (!autoMode) return;
-
-  loadQuestion();
-
-  const delay = parseInt(document.getElementById("delay").value);
-
-  // show answer
-  autoTimer = setTimeout(() => {
-    showAnswer();
-
-    // next question
-    autoTimer = setTimeout(() => {
-      runAuto();
-    }, delay);
-
-  }, delay);
-}
-
-// ===== RECORD =====
-let mediaRecorder;
-let audioChunks = [];
-let stream;
-
-async function startRecording() {
-  try {
-    stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-
-    mediaRecorder = new MediaRecorder(stream);
-    audioChunks = [];
-
-    mediaRecorder.ondataavailable = e => {
-      if (e.data.size > 0) audioChunks.push(e.data);
-    };
-
-    mediaRecorder.onstop = () => {
-      const blob = new Blob(audioChunks);
-      const url = URL.createObjectURL(blob);
-
-      const audio = document.createElement("audio");
-      audio.src = url;
-      audio.controls = true;
-
-      document.body.appendChild(audio);
-
-      stream.getTracks().forEach(t => t.stop());
-    };
-
-    mediaRecorder.start();
-  } catch (err) {
-    alert("Mic error: " + err.message);
+// ===== NEXT =====
+function next(){
+  current++;
+  if(current > endIdx){
+    alert("Lesson Completed!!!");
+    return;
   }
+  load();
 }
 
-function stopRecording() {
-  if (mediaRecorder && mediaRecorder.state !== "inactive") {
-    mediaRecorder.stop();
-  }
+// ===== TOGGLE =====
+function toggleAuto(){
+  autoMode=!autoMode;
+  event.target.innerText=autoMode?"🤖 Auto: ON":"🤖 Auto: OFF";
 }
 
 </script>
