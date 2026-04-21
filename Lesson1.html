@@ -27,6 +27,20 @@ button { padding:6px 12px; margin-right:5px }
   display:none;
   color:green;
 }
+thead th {
+  position: sticky;
+  top: 0;
+  background: #f4f4f4;
+  z-index: 1;
+}
+.highlight {
+  background: #ffeaa7;
+  transform: scale(1.02);
+  transition: 0.2s;
+}
+html {
+  scroll-behavior: smooth;
+}
 </style>
 </head>
 
@@ -267,7 +281,17 @@ function stopAll(){playing=false; speechSynthesis.cancel(); clearHighlight()}
 // ===== UI =====
 function highlight(i){
   clearHighlight();
-  document.getElementById("row-"+i)?.classList.add("highlight");
+
+  const row = document.getElementById("row-"+i);
+  if(!row) return;
+
+  row.classList.add("highlight");
+
+  // ✅ scroll mượt + đưa vào giữa màn hình
+  row.scrollIntoView({
+    behavior: "smooth",
+    block: "center"
+  });
 }
 function clearHighlight(){
  document.querySelectorAll("tr").forEach(r=>r.classList.remove("highlight"));
