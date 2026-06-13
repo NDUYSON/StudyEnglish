@@ -60,14 +60,14 @@ function rate(){ return parseFloat(speedSlider.value); }
 const sentences = [
 
 ["Good morning everyone, and thank you for your time today.","Chào buổi sáng mọi người, cảm ơn mọi người đã dành thời gian hôm nay."],
-["My name is Son, an engineer from the ePower Train Mechanical System Development Team.","Tôi tên là …, kỹ sư thuộc nhóm Phát triển Hệ thống Cơ khí ePT."],
+["My name is Son, an engineer from the ePower Train Mechanical System Development Team.","Tôi tên là Son, kỹ sư thuộc nhóm Phát triển Hệ thống Cơ khí ePower Train."],
 ["On behalf of our team, I would like to present the BPE activity outcomes from last year.","Thay mặt nhóm, tôi xin trình bày kết quả hoạt động BPE của năm vừa rồi."],
 ["Let me begin my presentation.","Tôi xin bắt đầu bài thuyết trình."],
 
 ["As shown on the screen, the theme we selected is this.","Như thể hiện trên màn hình, đây là chủ đề mà chúng tôi đã chọn."],
-["Use a Drawing Management Sheet to prevent omissions and shorten checking time during design changes.","Sử dụng bảng quản lý bản vẽ để tránh bỏ sót và rút ngắn thời gian kiểm tra khi thay đổi thiết kế."],
+["Use a Drawing Management Sheet to prevent omissions and shorten the checking time during design changes.","Sử dụng bảng quản lý bản vẽ để tránh bỏ sót và rút ngắn thời gian kiểm tra khi thay đổi thiết kế."],
 ["We are a team of five members, including Tsuchino‑san.","Chúng tôi là nhóm gồm năm thành viên, bao gồm cả Tsuchino‑san."],
-["I have been the team leader.","Tôi là người đảm nhiệm vai trò trưởng nhóm."],
+["I have been the team leader.","Tôi là trưởng nhóm của hoạt động này."],
 
 ["This is today’s agenda.","Đây là nội dung chính của buổi hôm nay."],
 ["First, I will explain the background behind choosing this theme.","Đầu tiên, tôi sẽ giải thích lý do chọn chủ đề này."],
@@ -75,13 +75,15 @@ const sentences = [
 ["Finally, I will give a summary.","Cuối cùng, tôi sẽ đưa ra phần tổng kết."],
 
 ["This slide provides the background for why we selected this theme.","Slide này cho thấy lý do vì sao chúng tôi chọn chủ đề này."],
-["ePT products have many variations and components.","Sản phẩm ePT có rất nhiều biến thể và linh kiện."],
-["It takes a long time to check all affected objects during a design change.","Việc kiểm tra tất cả các đối tượng bị ảnh hưởng khi thay đổi thiết kế mất rất nhiều thời gian."],
+["ePower Train products have many variations and components.","Sản phẩm ePower Train có rất nhiều biến thể và linh kiện."],
+["It takes a long time to check whether all objects are included in the ECA during a design change.","Việc kiểm tra xem tất cả đối tượng có được đưa vào ECA hay không mất rất nhiều thời gian."],
 
-["It is required to add a new sheet for multi‑sheet drawings.","Cần phải thêm sheet mới cho các bản vẽ nhiều trang."],
+["There are three patterns that explain why this process takes a long time.","Có ba dạng thay đổi thiết kế khiến quá trình này mất nhiều thời gian."],
+["We need to add new sheets for multi‑sheet drawings.","Chúng tôi phải thêm sheet mới cho các bản vẽ nhiều trang."],
 ["We need to convert old TIFF drawings into CATIA or Creo formats.","Chúng tôi phải chuyển đổi bản vẽ TIFF cũ sang định dạng CATIA hoặc Creo."],
-["We must create multi‑drawings when changing gear ratio or adding new SHIM thickness.","Khi thay đổi tỉ số truyền hoặc thêm độ dày SHIM, chúng tôi phải tạo bản vẽ mới."],
+["We must create new drawings when changing gear ratio or adding new SHIM thickness.","Khi thay đổi tỉ số truyền hoặc thêm độ dày SHIM, chúng tôi phải tạo bản vẽ mới."],
 
+["This slide explains the design‑change patterns in more detail.","Slide này giải thích chi tiết hơn về các dạng thay đổi thiết kế."],
 ["In a normal case, both the 3D model and the 2D drawing need to be revised.","Trong trường hợp bình thường, cả mô hình 3D và bản vẽ 2D đều phải được sửa."],
 ["For adding new sheets or converting TIFF drawings, we create new objects instead of revising existing ones.","Khi thêm sheet mới hoặc chuyển đổi TIFF, chúng tôi tạo đối tượng mới thay vì sửa đối tượng cũ."],
 ["For gear‑ratio changes or new SHIM thickness, we create a new 3D model while only revising the 2D drawing.","Khi thay đổi tỉ số truyền hoặc thêm SHIM, chúng tôi tạo mô hình 3D mới và chỉ sửa bản vẽ 2D."],
@@ -90,11 +92,76 @@ const sentences = [
 ["There is no horizontal sorting or old‑to‑new comparison.","Không có sắp xếp theo chiều ngang hoặc so sánh giữa bản cũ và bản mới."],
 ["Checking for missing items takes a lot of time.","Việc kiểm tra xem có thiếu sót hay không mất rất nhiều thời gian."],
 
+["Next, I will explain the clarification of the problem.","Tiếp theo, tôi sẽ giải thích phần làm rõ vấn đề."],
 ["We focused our analysis on three key points.","Chúng tôi tập trung phân tích vào ba điểm chính."],
 ["The current problem is that checking ECA information takes too much time.","Vấn đề hiện tại là việc kiểm tra thông tin ECA mất quá nhiều thời gian."],
-["Our ideal condition is to check all affected objects without spending time.","Điều kiện lý tưởng là có thể kiểm tra tất cả đối tượng mà không tốn thời gian."]
+["Our ideal condition is to check all affected objects without spending time.","Điều kiện lý tưởng là có thể kiểm tra tất cả đối tượng mà không tốn thời gian."],
+
+["This is the activity plan.","Đây là kế hoạch hoạt động."],
+["We planned to start in early April and begin operation within 2025.","Chúng tôi dự kiến bắt đầu từ đầu tháng 4 và vận hành trong năm 2025."],
+
+["Next, I will explain the assessment of the current situation and goal setting.","Tiếp theo, tôi sẽ trình bày việc đánh giá hiện trạng và đặt mục tiêu."],
+["In the recent design change for the Mitsubishi FUSO Transfer ML item, the change was adding Windchill numbers to the drawings.","Trong thay đổi thiết kế gần đây của hạng mục Mitsubishi FUSO Transfer ML, nội dung thay đổi là thêm số Windchill vào bản vẽ."],
+["There were 54 affected parts.","Có 54 linh kiện bị ảnh hưởng."],
+["There were 96 objects that needed processing.","Có 96 đối tượng cần xử lý."],
+["There were 42 drawings that required release.","Có 42 bản vẽ cần phát hành."],
+
+["We analyzed the time required for the conventional checking process.","Chúng tôi phân tích thời gian cần thiết cho quy trình kiểm tra thông thường."],
+["We set our target to reduce the checking time from 8 hours to 1 hour.","Chúng tôi đặt mục tiêu giảm thời gian kiểm tra từ 8 giờ xuống còn 1 giờ."],
+
+["Next, I will explain the investigation of the cause.","Tiếp theo, tôi sẽ trình bày phần điều tra nguyên nhân."],
+["We used a fishbone diagram to analyze why ECA checking takes a long time.","Chúng tôi sử dụng biểu đồ xương cá để phân tích lý do kiểm tra ECA mất nhiều thời gian."],
+["We identified three major causes.","Chúng tôi xác định ba nguyên nhân chính."],
+["Checking methods differ between members, causing time differences.","Phương pháp kiểm tra khác nhau giữa các thành viên, dẫn đến chênh lệch thời gian."],
+["Design changes require complex checking tasks with many patterns.","Thay đổi thiết kế yêu cầu nhiều bước kiểm tra phức tạp với nhiều dạng khác nhau."],
+["There are simply too many affected objects to process.","Có quá nhiều đối tượng bị ảnh hưởng cần xử lý."],
+
+["Next, I will explain the cause analysis.","Tiếp theo, tôi sẽ trình bày phân tích nguyên nhân gốc rễ."],
+["We used the Why‑Why analysis method.","Chúng tôi sử dụng phương pháp phân tích Why‑Why."],
+["We extracted two main root causes.","Chúng tôi xác định hai nguyên nhân gốc rễ chính."],
+["There is no checklist format to check affected objects.","Không có mẫu checklist để kiểm tra các đối tượng bị ảnh hưởng."],
+["There is no automatic alignment function for before‑and‑after objects.","Không có chức năng tự động căn chỉnh đối tượng trước và sau thay đổi."],
+
+["Next, I will explain the countermeasure planning.","Tiếp theo, tôi sẽ trình bày kế hoạch đối sách."],
+["For the first root cause, we will create the Drawing Management Sheet.","Với nguyên nhân thứ nhất, chúng tôi sẽ tạo Bảng Quản Lý Bản Vẽ."],
+["For the second root cause, we considered requesting a new function in Windchill.","Với nguyên nhân thứ hai, chúng tôi cân nhắc yêu cầu thêm chức năng mới trong Windchill."],
+["However, adding a new function to Windchill would require high cost and long lead time.","Tuy nhiên, thêm chức năng mới vào Windchill sẽ tốn chi phí cao và thời gian dài."],
+["Therefore, we decided to create the Drawing Management Sheet.","Vì vậy, chúng tôi quyết định tạo Bảng Quản Lý Bản Vẽ."],
+
+["Next is the implementation of countermeasures.","Tiếp theo là phần triển khai đối sách."],
+["The interface of the Drawing Management Sheet is shown here.","Giao diện của Bảng Quản Lý Bản Vẽ được hiển thị tại đây."],
+["ECR details are displayed in this section.","Thông tin ECR được hiển thị ở khu vực này."],
+["ECN and ECA information is managed horizontally.","Thông tin ECN và ECA được quản lý theo chiều ngang."],
+["All affected objects are listed with name, number, and revision.","Tất cả đối tượng bị ảnh hưởng được liệt kê với tên, mã số và revision."],
+["There is a button for checking the information.","Có một nút để kiểm tra thông tin."],
+
+["We created a macro to compare the sheet requirements with the actual ECA objects.","Chúng tôi tạo một macro để so sánh yêu cầu trong sheet với đối tượng thực tế trong ECA."],
+["Actual ECA objects must be exported from Windchill.","Các đối tượng ECA thực tế phải được xuất từ Windchill."],
+["The macro analyzes and compares the data automatically.","Macro sẽ tự động phân tích và so sánh dữ liệu."],
+
+["The output displays requested objects on the left and actual objects on the right.","Kết quả hiển thị đối tượng yêu cầu ở bên trái và đối tượng thực tế ở bên phải."],
+["Objects are aligned horizontally for comparison.","Các đối tượng được căn chỉnh theo chiều ngang để so sánh."],
+["The system compares name, number, and revision and shows OK or NG.","Hệ thống so sánh tên, mã số và revision và hiển thị OK hoặc NG."],
+["NG results help engineers identify issues and avoid rework.","Kết quả NG giúp kỹ sư xác định vấn đề và tránh làm lại."],
+["The results are exported to PDF and uploaded to the ECN.","Kết quả được xuất ra PDF và tải lên ECN."],
+
+["Next, I will explain the evaluation of effectiveness.","Tiếp theo, tôi sẽ trình bày đánh giá hiệu quả."],
+["We rechecked the workflow using the same ML items.","Chúng tôi kiểm tra lại quy trình bằng cùng hạng mục ML."],
+["The checking time decreased from 8 hours to 0.2 hours.","Thời gian kiểm tra giảm từ 8 giờ xuống còn 0.2 giờ."],
+["The goal was largely achieved.","Mục tiêu đã đạt được vượt mức."],
+["This countermeasure is now applied to Meidensha GB and FDU/RDU for GM and MMC.","Đối sách này hiện được áp dụng cho Meidensha GB và FDU/RDU của GM và MMC."],
+
+["These are the activity results.","Đây là kết quả hoạt động."],
+["We achieved major improvement through repeated trial and error.","Chúng tôi đạt được cải tiến lớn thông qua thử nghiệm và điều chỉnh liên tục."],
+
+["We have stored the Drawing Management Sheet in SharePoint.","Chúng tôi đã lưu Bảng Quản Lý Bản Vẽ trên SharePoint."],
+["We now attach the check results as a PDF to each ECN.","Chúng tôi đính kèm kết quả kiểm tra dạng PDF vào mỗi ECN."],
+["This is similar to the drawing checklist.","Điều này tương tự như checklist bản vẽ."],
+
+["And this is my presentation. Thank you very much.","Và đây là phần trình bày của tôi. Xin cảm ơn rất nhiều."]
 
 ];
+
 
 
 // ===== VOICE PRO (fix iPhone) =====
