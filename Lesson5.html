@@ -59,28 +59,43 @@ function rate(){ return parseFloat(speedSlider.value); }
 // ===== DATA (20 câu PRO) =====
 const sentences = [
 
-["Good morning everyone.","Chào buổi sáng mọi người."],
-["Thank you for joining today.","Cảm ơn mọi người đã tham gia hôm nay."],
-["Today, I would like to present our project.","Hôm nay tôi xin trình bày về dự án của chúng tôi."],
-["Let me start with a brief overview.","Tôi xin bắt đầu với phần tổng quan ngắn."],
-["First, I will explain the background.","Đầu tiên, tôi sẽ giải thích bối cảnh."],
-["Next, I will go through the main points.","Tiếp theo, tôi sẽ trình bày các điểm chính."],
-["Please take a look at this slide.","Mọi người hãy nhìn vào slide này."],
-["As you can see, the data shows a clear trend.","Như bạn thấy, dữ liệu cho thấy xu hướng rõ ràng."],
-["This graph represents our performance.","Biểu đồ này thể hiện hiệu suất của chúng tôi."],
-["Let me move on to the next topic.","Tôi xin chuyển sang nội dung tiếp theo."],
-["I would like to highlight this key point.","Tôi muốn nhấn mạnh điểm quan trọng này."],
-["This is one of the most important factors.","Đây là một trong những yếu tố quan trọng nhất."],
-["Based on this data, we can conclude that...","Dựa trên dữ liệu này, chúng ta có thể kết luận rằng..."],
-["Now, let’s look at the results.","Bây giờ hãy xem kết quả."],
-["In conclusion, our project achieved its goals.","Tóm lại, dự án của chúng tôi đã đạt được mục tiêu."],
-["Thank you for your attention.","Cảm ơn mọi người đã chú ý lắng nghe."],
-["If you have any questions, feel free to ask.","Nếu có câu hỏi, xin cứ thoải mái hỏi."],
-["I will now answer your questions.","Bây giờ tôi sẽ trả lời câu hỏi."],
-["Let me clarify that point.","Tôi xin làm rõ điểm đó."],
-["Finally, thank you very much.","Cuối cùng, xin cảm ơn rất nhiều."]
+["Good morning everyone, and thank you for your time today.","Chào buổi sáng mọi người, cảm ơn mọi người đã dành thời gian hôm nay."],
+["My name is …, an engineer from the ePT Mechanical System Development Team.","Tôi tên là …, kỹ sư thuộc nhóm Phát triển Hệ thống Cơ khí ePT."],
+["On behalf of our team, I would like to present the BPE activity outcomes from last year.","Thay mặt nhóm, tôi xin trình bày kết quả hoạt động BPE của năm vừa rồi."],
+["Let me begin my presentation.","Tôi xin bắt đầu bài thuyết trình."],
+
+["As shown on the screen, the theme we selected is this.","Như thể hiện trên màn hình, đây là chủ đề mà chúng tôi đã chọn."],
+["Use a Drawing Management Sheet to prevent omissions and shorten checking time during design changes.","Sử dụng bảng quản lý bản vẽ để tránh bỏ sót và rút ngắn thời gian kiểm tra khi thay đổi thiết kế."],
+["We are a team of five members, including Tsuchino‑san.","Chúng tôi là nhóm gồm năm thành viên, bao gồm cả Tsuchino‑san."],
+["I have been the team leader.","Tôi là người đảm nhiệm vai trò trưởng nhóm."],
+
+["This is today’s agenda.","Đây là nội dung chính của buổi hôm nay."],
+["First, I will explain the background behind choosing this theme.","Đầu tiên, tôi sẽ giải thích lý do chọn chủ đề này."],
+["Next, I will clarify the problem and activity plan.","Tiếp theo, tôi sẽ làm rõ vấn đề và kế hoạch hoạt động."],
+["Finally, I will give a summary.","Cuối cùng, tôi sẽ đưa ra phần tổng kết."],
+
+["This slide provides the background for why we selected this theme.","Slide này cho thấy lý do vì sao chúng tôi chọn chủ đề này."],
+["ePT products have many variations and components.","Sản phẩm ePT có rất nhiều biến thể và linh kiện."],
+["It takes a long time to check all affected objects during a design change.","Việc kiểm tra tất cả các đối tượng bị ảnh hưởng khi thay đổi thiết kế mất rất nhiều thời gian."],
+
+["It is required to add a new sheet for multi‑sheet drawings.","Cần phải thêm sheet mới cho các bản vẽ nhiều trang."],
+["We need to convert old TIFF drawings into CATIA or Creo formats.","Chúng tôi phải chuyển đổi bản vẽ TIFF cũ sang định dạng CATIA hoặc Creo."],
+["We must create multi‑drawings when changing gear ratio or adding new SHIM thickness.","Khi thay đổi tỉ số truyền hoặc thêm độ dày SHIM, chúng tôi phải tạo bản vẽ mới."],
+
+["In a normal case, both the 3D model and the 2D drawing need to be revised.","Trong trường hợp bình thường, cả mô hình 3D và bản vẽ 2D đều phải được sửa."],
+["For adding new sheets or converting TIFF drawings, we create new objects instead of revising existing ones.","Khi thêm sheet mới hoặc chuyển đổi TIFF, chúng tôi tạo đối tượng mới thay vì sửa đối tượng cũ."],
+["For gear‑ratio changes or new SHIM thickness, we create a new 3D model while only revising the 2D drawing.","Khi thay đổi tỉ số truyền hoặc thêm SHIM, chúng tôi tạo mô hình 3D mới và chỉ sửa bản vẽ 2D."],
+
+["The system only lists affected objects vertically.","Hệ thống chỉ liệt kê các đối tượng bị ảnh hưởng theo chiều dọc."],
+["There is no horizontal sorting or old‑to‑new comparison.","Không có sắp xếp theo chiều ngang hoặc so sánh giữa bản cũ và bản mới."],
+["Checking for missing items takes a lot of time.","Việc kiểm tra xem có thiếu sót hay không mất rất nhiều thời gian."],
+
+["We focused our analysis on three key points.","Chúng tôi tập trung phân tích vào ba điểm chính."],
+["The current problem is that checking ECA information takes too much time.","Vấn đề hiện tại là việc kiểm tra thông tin ECA mất quá nhiều thời gian."],
+["Our ideal condition is to check all affected objects without spending time.","Điều kiện lý tưởng là có thể kiểm tra tất cả đối tượng mà không tốn thời gian."]
 
 ];
+
 
 // ===== VOICE PRO (fix iPhone) =====
 let usVoice = null;
